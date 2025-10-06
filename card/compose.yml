@@ -1,0 +1,27 @@
+networks:
+  development:
+    external: true
+    name: $DOCKER_NETWORK_NAME
+
+services:
+  app:
+    build:
+      context: .
+      target: development
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    environment:
+      VIRTUAL_HOST: $APP_NAME.$DOCKER_DOMAIN_NAME
+      VIRTUAL_PROTO: grpc
+      VIRTUAL_PORT: 50051
+      HTTP_PORT: 50051
+      HTTPS_METHOD: nohttps
+    command: go run /app/cmd/grpc_server/main.go
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      development:
+        aliases:
+          - $APP_NAME.$DOCKER_DOMAIN_NAME
