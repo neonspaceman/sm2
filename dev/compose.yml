@@ -1,0 +1,77 @@
+networks:
+  development:
+    external: true
+    name: $DOCKER_NETWORK_NAME
+
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    hostname: kafka-ui
+    domainname: $DOCKER_DOMAIN_NAME
+    networks:
+      development:
+        aliases:
+          - kafka-ui.$DOCKER_DOMAIN_NAME
+    depends_on:
+      - kafka
+    env_file: .env
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      VIRTUAL_HOST: kafka-ui.$DOCKER_DOMAIN_NAME
+
+  kafka:
+    image: bitnami/kafka:3.4
+    hostname: kafka
+    domainname: $DOCKER_DOMAIN_NAME
+    networks:
+      development:
+        aliases:
+          - kafka-proxy.$DOCKER_DOMAIN_NAME
+    env_file: .env
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    ports:
+      - 9092:9092
+    volumes:
+      - ./data/kafka_data:/bitnami
+
+  postgresql:
+    image: 'postgres:15.2'
+#    hostname: postgresql
+#    domainname: $DOCKER_DOMAIN_NAME
+    restart: always
+    networks:
+      development:
+        aliases:
+          - postgresql.$DOCKER_DOMAIN_NAME
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      PGPASSWORD: $POSTGRES_PASSWORD
+    volumes:
+      - ./data/postgres_data:/var/lib/postgresql/data/pgdata
+#    ports:
+#      - '8054:5432'
+
+  reverse-proxy:
+    image: jwilder/nginx-proxy:alpine
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      HTTP_PORT: 3000
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    networks:
+      development:
+        aliases:
+          - reverse_proxy.$DOCKER_DOMAIN_NAME
