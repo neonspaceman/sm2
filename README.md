@@ -4,7 +4,7 @@ Description: https://en.wikipedia.org/wiki/SuperMemo
 
 Services:
 
-* [Dev](dev) - Development environment
+* [Infrastructure](infrastructure) - Development infrastructure environment
 * [Card](card) - Card service
 * [Telegram bot](telegram-bot) - Service for interacting with Telegram
 * [Telegram gate](telegram-gate) - Service for sending messages to Telegram
