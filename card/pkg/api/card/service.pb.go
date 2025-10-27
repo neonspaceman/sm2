@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.27.1
 // 	protoc        v3.21.12
-// source: api/card/service.proto
+// source: proto/card/service.proto
 
 package card
 
@@ -40,12 +40,12 @@ var file_api_card_service_proto_rawDesc = []byte{
 }
 
 var file_api_card_service_proto_goTypes = []interface{}{
-	(*CreateRequest)(nil),  // 0: sm2.api.card.CreateRequest
-	(*CreateResponse)(nil), // 1: sm2.api.card.CreateResponse
+	(*CreateRequest)(nil),  // 0: sm2.proto.card.CreateRequest
+	(*CreateResponse)(nil), // 1: sm2.proto.card.CreateResponse
 }
 var file_api_card_service_proto_depIdxs = []int32{
-	0, // 0: sm2.api.card.CardService.Create:input_type -> sm2.api.card.CreateRequest
-	1, // 1: sm2.api.card.CardService.Create:output_type -> sm2.api.card.CreateResponse
+	0, // 0: sm2.proto.card.CardService.Create:input_type -> sm2.proto.card.CreateRequest
+	1, // 1: sm2.proto.card.CardService.Create:output_type -> sm2.proto.card.CreateResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

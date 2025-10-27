@@ -1,7 +1,6 @@
 package di
 
 import (
-	"card/internal/config"
 	"slices"
 	"strconv"
 	"sync"
@@ -11,15 +10,13 @@ type Container int
 
 // Deprecated: attempt to do DI
 type DI struct {
-	cfg        *config.Config
 	mu         sync.Mutex
 	cleanups   []func()
 	containers map[Container]any
 }
 
-func NewDI(cfg *config.Config) *DI {
+func NewDI() *DI {
 	return &DI{
-		cfg:        cfg,
 		containers: make(map[Container]any),
 	}
 }

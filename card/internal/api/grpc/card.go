@@ -3,7 +3,6 @@ package grpc
 import (
 	"card/internal/usecase/command"
 	"card/pkg/api/card"
-	"card/pkg/logger"
 	"context"
 	"errors"
 	"github.com/go-playground/validator/v10"
@@ -11,6 +10,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"platform/pkg/logger"
 )
 
 type CardImplProps struct {

@@ -31,7 +31,7 @@ func NewCardServiceClient(cc grpc.ClientConnInterface) CardServiceClient {
 
 func (c *cardServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
 	out := new(CreateResponse)
-	err := c.cc.Invoke(ctx, "/sm2.api.card.CardService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/sm2.proto.card.CardService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func _CardService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sm2.api.card.CardService/Create",
+		FullMethod: "/sm2.proto.card.CardService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CardServiceServer).Create(ctx, req.(*CreateRequest))
@@ -88,7 +88,7 @@ func _CardService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CardService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sm2.api.card.CardService",
+	ServiceName: "sm2.proto.card.CardService",
 	HandlerType: (*CardServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -97,5 +97,5 @@ var CardService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/card/service.proto",
+	Metadata: "proto/card/service.proto",
 }

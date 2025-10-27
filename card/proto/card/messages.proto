@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sm2.api.card;
 
-option go_package = "card/pkg/api/card;card";
+option go_package = "card/pkg/proto/card;card";
 
 message Card {
   string id = 1;

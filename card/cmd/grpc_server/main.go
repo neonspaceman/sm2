@@ -4,12 +4,13 @@ import (
 	"card/internal/adapter/postgresql"
 	apiPkg "card/internal/api/grpc"
 	"card/internal/config"
+	"card/internal/consts"
 	"card/internal/usecase/command"
-	dbalPkg "card/pkg/dbal"
-	logPkg "card/pkg/logger"
 	grpc_server "card/pkg/server"
 	"flag"
 	validatorPkg "github.com/go-playground/validator/v10"
+	dbalPkg "platform/pkg/dbal"
+	logPkg "platform/pkg/logger"
 	"slices"
 )
 
@@ -40,7 +41,10 @@ func main() {
 }
 
 func run(cfg *config.Config) error {
-	log, err := logPkg.NewLogger(cfg)
+	log, err := logPkg.NewLogger(
+		logPkg.WithDevelopmentMode(cfg.App.Env == consts.EnvDev),
+		logPkg.WithLevel(cfg.Log.Level),
+	)
 	if err != nil {
 		return err
 	}

@@ -58,8 +58,8 @@ proto-generate: ## Generate all proto files
 			--go_out=./pkg --go_opt=paths=source_relative \
 			--plugin=protoc-gen-go-grpc=/go/bin/protoc-gen-go-grpc \
 			--go-grpc_out=./pkg --go-grpc_opt=paths=source_relative \
-			./api/card/messages.proto \
-			./api/card/service.proto
+			./proto/card/messages.proto \
+			./proto/card/service.proto
 
 .PHONY: compose-build
 compose-build:

@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.27.1
 // 	protoc        v3.21.12
-// source: api/card/messages.proto
+// source: proto/card/messages.proto
 
 package card
 
@@ -224,12 +224,12 @@ func file_api_card_messages_proto_rawDescGZIP() []byte {
 
 var file_api_card_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_api_card_messages_proto_goTypes = []interface{}{
-	(*Card)(nil),           // 0: sm2.api.card.Card
-	(*CreateRequest)(nil),  // 1: sm2.api.card.CreateRequest
-	(*CreateResponse)(nil), // 2: sm2.api.card.CreateResponse
+	(*Card)(nil),           // 0: sm2.proto.card.Card
+	(*CreateRequest)(nil),  // 1: sm2.proto.card.CreateRequest
+	(*CreateResponse)(nil), // 2: sm2.proto.card.CreateResponse
 }
 var file_api_card_messages_proto_depIdxs = []int32{
-	0, // 0: sm2.api.card.CreateResponse.card:type_name -> sm2.api.card.Card
+	0, // 0: sm2.proto.card.CreateResponse.card:type_name -> sm2.proto.card.Card
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

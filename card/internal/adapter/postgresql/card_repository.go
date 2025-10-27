@@ -3,9 +3,9 @@ package postgresql
 import (
 	"card/internal/consts"
 	"card/internal/domain/entity"
-	"card/pkg/dbal"
 	"context"
 	"fmt"
+	"platform/pkg/dbal"
 )
 
 type CardRepository struct {
@@ -38,13 +38,13 @@ func (r *CardRepository) Create(ctx context.Context, model entity.CardCard) erro
 		ToSql()
 
 	if err != nil {
-		return fmt.Errorf("NewCardRepository.Create: unable build sql: %w", err)
+		return fmt.Errorf("build sql: %w", err)
 	}
 
 	_, err = r.dbal.Exec(ctx, sql, args...)
 
 	if err != nil {
-		return fmt.Errorf("NewCardRepository.Create: unable to execute sql \"%s\": %w", sql, err)
+		return fmt.Errorf("execute sql \"%s\": %w", sql, err)
 	}
 
 	return nil

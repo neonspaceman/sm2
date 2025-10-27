@@ -1,22 +1,29 @@
 package logger
 
 import (
-	"card/internal/config"
-	"card/internal/consts"
-	"card/pkg/request_id"
 	"context"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"platform/pkg/request_id"
 )
 
 type Logger struct {
+	level       int8
+	development bool
+
 	zap *zap.Logger
 }
 
-func NewLogger(cfg *config.Config) (*Logger, error) {
+func NewLogger(opts ...Option) (*Logger, error) {
+	l := &Logger{}
+
+	for _, opt := range opts {
+		opt(l)
+	}
+
 	zapConfig := zap.Config{
-		Level:            zap.NewAtomicLevelAt(zapcore.Level(cfg.Log.Level)),
-		Development:      cfg.App.Env == consts.EnvDev,
+		Level:            zap.NewAtomicLevelAt(zapcore.Level(l.level)),
+		Development:      l.development,
 		Encoding:         "json",
 		EncoderConfig:    zap.NewProductionEncoderConfig(),
 		OutputPaths:      []string{"stdout"},
@@ -30,7 +37,9 @@ func NewLogger(cfg *config.Config) (*Logger, error) {
 
 	logger = logger.WithOptions(zap.AddCallerSkip(1))
 
-	return &Logger{zap: logger}, nil
+	l.zap = logger
+
+	return l, nil
 }
 
 func (log *Logger) Debug(msg string, fields ...zap.Field) {

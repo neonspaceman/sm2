@@ -40,7 +40,7 @@ func (s *CardCreateHandler) Handle(ctx context.Context, cmd CardCreateCmd) (enti
 	err = s.repository.Create(ctx, entity)
 
 	if err != nil {
-		return entityPkg.CardCard{}, fmt.Errorf("cardCreateHandler.Handle: unable to create new card: %w", err)
+		return entityPkg.CardCard{}, fmt.Errorf("create new card: %w", err)
 	}
 
 	return entity, nil
