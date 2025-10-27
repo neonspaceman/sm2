@@ -50,7 +50,7 @@ func run(cfg *config.Config) error {
 	}
 	defer log.Close()
 
-	dbal, err := dbalPkg.NewDBAL(cfg, log)
+	dbal, err := dbalPkg.NewDBAL(cfg.Database.DSN, log)
 	if err != nil {
 		return err
 	}

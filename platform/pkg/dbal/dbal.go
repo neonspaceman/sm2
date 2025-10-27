@@ -1,8 +1,6 @@
 package dbal
 
 import (
-	"card/internal/config"
-	"card/pkg/logger"
 	"context"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -11,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
+	"platform/pkg/logger"
 )
 
 type DBAL struct {
@@ -18,10 +17,10 @@ type DBAL struct {
 	log  *logger.Logger
 }
 
-func NewDBAL(config *config.Config, log *logger.Logger) (*DBAL, error) {
-	log.Info(fmt.Sprintf("Connection to %s", config.Database.DSN))
+func NewDBAL(dsn string, log *logger.Logger) (*DBAL, error) {
+	log.Info(fmt.Sprintf("Connection to %s", dsn))
 
-	connection, err := pgxpool.New(context.Background(), config.Database.DSN)
+	connection, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +30,7 @@ func NewDBAL(config *config.Config, log *logger.Logger) (*DBAL, error) {
 		return nil, err
 	}
 
-	log.Info(fmt.Sprintf("Connected to %s", config.Database.DSN))
+	log.Info(fmt.Sprintf("Connected to %s", dsn))
 
 	return &DBAL{connection, log}, nil
 }

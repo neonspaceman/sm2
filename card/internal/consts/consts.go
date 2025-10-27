@@ -1,4 +1,4 @@
 package consts
 
 const GrpcRequestIdKey = "Request-Id"
-const EnvDev = "dev"
+const EnvDev = "infrastructure"

@@ -14,7 +14,6 @@ services:
           - kafka-ui.$DOCKER_DOMAIN_NAME
     depends_on:
       - kafka
-    env_file: .env
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
       KAFKA_CLUSTERS_0_NAME: local
@@ -29,7 +28,6 @@ services:
       development:
         aliases:
           - kafka-proxy.$DOCKER_DOMAIN_NAME
-    env_file: .env
     environment:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
@@ -52,8 +50,6 @@ services:
       development:
         aliases:
           - postgresql.$DOCKER_DOMAIN_NAME
-    env_file:
-      - .env
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       PGPASSWORD: $POSTGRES_PASSWORD

@@ -1,0 +1,15 @@
+root = "/app/card"
+tmp_dir = "/tmp"
+
+[build]
+bin = "/tmp/card"
+args_bin=["--env=/app/card/.env"]
+cmd = "go build -o /tmp/card /app/card/cmd/grpc_server/main.go"
+delay = 1000
+exclude_dir = []
+exclude_regex = ["_test.go"]
+log = "build-errors.log"
+stop_on_error = false
+
+[misc]
+clean_on_exit = true

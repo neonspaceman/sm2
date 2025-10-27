@@ -1,0 +1,53 @@
+networks:
+  development:
+    external: true
+    name: $DOCKER_NETWORK_NAME
+
+services:
+  card:
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/app
+    environment:
+      VIRTUAL_HOST: card.$DOCKER_DOMAIN_NAME
+      VIRTUAL_PROTO: grpc
+      VIRTUAL_PORT: 50051
+      HTTP_PORT: 50051
+      HTTPS_METHOD: nohttps
+    command: air -c /app/card/.air.toml
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      development:
+        aliases:
+          - card.$DOCKER_DOMAIN_NAME
+
+  telegram-bot:
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/app
+    command: air -c /app/telegram-bot/.air.toml
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      development:
+        aliases:
+          - telegram-bot.$DOCKER_DOMAIN_NAME
+
+  telegram-gate:
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/app
+    command: air -c /app/telegram-gate/.air.toml
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      development:
+        aliases:
+          - $APP_NAME.$DOCKER_DOMAIN_NAME
