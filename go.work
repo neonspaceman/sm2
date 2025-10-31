@@ -4,5 +4,4 @@ use (
 	./card
 	./platform
 	./telegram-bot
-	./telegram-gate
 )

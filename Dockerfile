@@ -14,8 +14,6 @@ COPY go.work go.work.sum ./
 COPY card/go.mod card/go.sum ./card/
 COPY platform/go.mod platform/go.sum ./platform/
 COPY telegram-bot/go.mod telegram-bot/go.sum ./telegram-bot/
-COPY telegram-gate/go.mod telegram-gate/go.sum ./telegram-gate/
 
 RUN cd /app/card && go mod download && \
-  cd /app/telegram-bot && go mod download && \
-  cd /app/telegram-gate && go mod download
+  cd /app/telegram-bot && go mod download

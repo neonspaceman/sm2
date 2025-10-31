@@ -37,17 +37,3 @@ services:
       development:
         aliases:
           - telegram-bot.$DOCKER_DOMAIN_NAME
-
-  telegram-gate:
-    build:
-      context: .
-      target: development
-    volumes:
-      - .:/app
-    command: air -c /app/telegram-gate/.air.toml
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    networks:
-      development:
-        aliases:
-          - $APP_NAME.$DOCKER_DOMAIN_NAME
