@@ -60,7 +60,7 @@ func run(cfg *config.Config) error {
 
 	cardRepository := postgresql.NewCardRepository(dbal)
 
-	cardCreateHandler := command.NewCardCreateHandler(cardRepository, validator)
+	cardCreateHandler := command.NewCreateCardHandler(cardRepository, validator)
 
 	api := apiPkg.NewCardImpl(apiPkg.CardImplProps{
 		CardCreateHandler: cardCreateHandler,

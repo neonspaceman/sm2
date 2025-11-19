@@ -4,8 +4,6 @@
 ENV_FILE=.env
 include $(ENV_FILE)
 
-CURRENT_USER := $(shell id -u)
-
 .PHONY: help
 help: ## Show commands descriptions
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(abspath $(firstword $(MAKEFILE_LIST))) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-38s\033[0m %s\n", $$1, $$2}'
@@ -22,7 +20,7 @@ migrate-up: ## Execute migrations
 		--rm \
 		--volume ./:/app \
 		--network $(DOCKER_NETWORK_NAME) \
-		$$(docker compose images -q app) \
+		$$(docker compose images -q card) \
 		/go/bin/goose \
 			-dir $(MIGRATIONS) postgres "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DATABASE}?sslmode=disable" up
 
@@ -32,7 +30,7 @@ migrate-down: ## Rollback migration
 		--rm \
 		--volume ./:/app \
 		--network $(DOCKER_NETWORK_NAME) \
-		$$(docker compose images -q app) \
+		$$(docker compose images -q card) \
 		/go/bin/goose \
  			-dir $(MIGRATIONS) postgres "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DATABASE}?sslmode=disable" down
 
@@ -42,7 +40,7 @@ migrate-create: ## Create new migration. Example: make migrate-create name=<NAME
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume ./:/app \
-		$$(docker compose images -q app) \
+		$$(docker compose images -q card) \
 		/go/bin/goose \
 	  		-dir $(MIGRATIONS) create $(name) sql
 
@@ -52,27 +50,12 @@ proto-generate: ## Generate all proto files
 		--rm \
 		--user $$(id -u):$$(id -g) \
 		--volume ./:/app \
-		$$(docker compose images -q app) \
+		$$(docker compose images -q card) \
 		protoc \
+			--proto_path=proto \
 			--plugin=protoc-gen-go=/go/bin/protoc-gen-go \
-			--go_out=./pkg --go_opt=paths=source_relative \
-			--plugin=protoc-gen-go-grpc=/go/bin/protoc-gen-go-grpc \
-			--go-grpc_out=./pkg --go-grpc_opt=paths=source_relative \
-			./proto/card/messages.proto \
-			./proto/card/service.proto
-
-.PHONY: compose-build
-compose-build:
-	docker compose build
-
-.PHONY: compose-up
-compose-up: ## Run go app
-	docker compose up --force-recreate
-
-.PHONY: compose-up-d
-compose-up-d: ## Run go app in background
-	docker compose up -d --force-recreate
-
-.PHONY: compose-down
-compose-down: ## Down all dev containers
-	docker compose down
+         	--go_out=pkg/api --go_opt=paths=source_relative \
+         	--plugin=protoc-gen-go-grpc=/go/bin/protoc-gen-go-grpc \
+         	--go-grpc_out=pkg/api --go-grpc_opt=paths=source_relative \
+         	card/messages.proto \
+         	card/service.proto

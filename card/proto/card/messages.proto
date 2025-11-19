@@ -2,17 +2,28 @@ syntax = "proto3";
 
 package sm2.api.card;
 
-option go_package = "card/pkg/proto/card;card";
+option go_package = "card/pkg/api/card;card";
+
+enum FileType {
+  NONE = 0;
+  PHOTO = 1;
+  DOCUMENT = 2;
+}
 
 message Card {
   string id = 1;
-  string front_content = 2;
-  string back_content = 3;
+  string question = 2;
+  string answer = 3;
+  FileType file_type = 4;
+  string file_id = 5;
 }
 
 message CreateRequest {
-  string front_content = 1;
-  string back_content = 2;
+  string user_id = 1;
+  string question = 2;
+  string answer = 3;
+  FileType file_type = 4;
+  string file_id = 5;
 }
 
 message CreateResponse {

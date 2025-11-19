@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"telegram-bot/internal/domain/entity"
 	"telegram-bot/internal/domain/repository"
+	"telegram-bot/internal/domain/types"
 )
 
 const defaultStep = "none"
@@ -36,7 +37,7 @@ func (h *DialogFirstOrCreateHandler) Handle(ctx context.Context, cmd DialogFirst
 		return d, nil
 	}
 
-	d = entity.NewDialog(defaultStep, map[string]string{}, cmd.ChatId)
+	d = entity.NewDialog(defaultStep, types.DialogParams{}, cmd.ChatId)
 
 	err = h.repository.Create(ctx, d)
 

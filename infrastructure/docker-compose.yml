@@ -8,27 +8,28 @@ services:
     image: 'postgres:15.2'
     restart: always
     networks:
-      development:
-        aliases:
-          - postgresql.$DOCKER_DOMAIN_NAME
+      - development
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       PGPASSWORD: $POSTGRES_PASSWORD
     volumes:
       - ./data/postgres_data:/var/lib/postgresql/data/pgdata
     ports:
-      - '8054:5432'
+      - '8081:5432'
 
-  reverse-proxy:
-    image: jwilder/nginx-proxy:alpine
-    restart: always
+  traefik:
+    image: 'traefik:v3.5.4'
     ports:
-      - 3000:3000
-    environment:
-      HTTP_PORT: 3000
+      - 8080:8080
+      - 50051:50051 # grpc
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+#      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.grpc.address=:50051"
+      - "--serversTransport.insecureSkipVerify=true"
     networks:
-      development:
-        aliases:
-          - reverse_proxy.$DOCKER_DOMAIN_NAME
+      - development

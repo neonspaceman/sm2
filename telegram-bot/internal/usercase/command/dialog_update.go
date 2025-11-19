@@ -4,12 +4,13 @@ import (
 	"context"
 	"telegram-bot/internal/domain/entity"
 	"telegram-bot/internal/domain/repository"
+	"telegram-bot/internal/domain/types"
 )
 
 type DialogUpdateCmd struct {
 	Dialog *entity.Dialog
 	Step   string
-	Params map[string]string
+	Params types.DialogParams
 }
 
 type DialogUpdateHandler struct {

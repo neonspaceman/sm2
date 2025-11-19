@@ -6,5 +6,5 @@ import (
 )
 
 type CardRepositoryInterface interface {
-	Create(ctx context.Context, model entity.CardCard) error
+	Create(ctx context.Context, model *entity.Card) error
 }

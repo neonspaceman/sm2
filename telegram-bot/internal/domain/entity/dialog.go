@@ -2,19 +2,20 @@ package entity
 
 import (
 	"github.com/google/uuid"
+	"telegram-bot/internal/domain/types"
 	"time"
 )
 
 type Dialog struct {
-	Id        uuid.UUID         `db:"id"`
-	Step      string            `db:"step"`
-	Params    map[string]string `db:"params"`
-	UserId    uuid.UUID         `db:"user_id"`
-	CreatedAt time.Time         `db:"created_at"`
-	UpdatedAt time.Time         `db:"updated_at"`
+	Id        uuid.UUID          `db:"id"`
+	Step      string             `db:"step"`
+	Params    types.DialogParams `db:"params"`
+	UserId    uuid.UUID          `db:"user_id"`
+	CreatedAt time.Time          `db:"created_at"`
+	UpdatedAt time.Time          `db:"updated_at"`
 }
 
-func NewDialog(step string, params map[string]string, userId uuid.UUID) *Dialog {
+func NewDialog(step string, params types.DialogParams, userId uuid.UUID) *Dialog {
 	now := time.Now()
 
 	return &Dialog{
@@ -34,7 +35,7 @@ func (d *Dialog) SetStep(step string) *Dialog {
 	return d
 }
 
-func (d *Dialog) SetParam(key, value string) *Dialog {
+func (d *Dialog) SetParam(key types.DialogParam, value string) *Dialog {
 	d.UpdatedAt = time.Now()
 	d.Params[key] = value
 

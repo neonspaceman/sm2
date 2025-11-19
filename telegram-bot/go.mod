@@ -18,6 +18,8 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/guregu/null v4.0.0+incompatible // indirect
+	github.com/guregu/null/v6 v6.0.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/looplab/fsm v1.0.3 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect

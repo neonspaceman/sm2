@@ -1,11 +1,22 @@
 package postgresql
 
 import (
-	"card/internal/consts"
 	"card/internal/domain/entity"
 	"context"
 	"fmt"
 	"platform/pkg/dbal"
+)
+
+const (
+	cardTableName       = "card"
+	cardIdColumn        = "id"
+	cardUserIdColumn    = "user_id"
+	cardQuestionColumn  = "question"
+	cardAnswerColumn    = "answer"
+	cardFileTypeColumn  = "file_type"
+	cardFileIdColumn    = "file_id"
+	cardCreatedAtColumn = "created_at"
+	cardUpdatedAtColumn = "updated_at"
 )
 
 type CardRepository struct {
@@ -18,22 +29,28 @@ func NewCardRepository(dbal *dbal.DBAL) *CardRepository {
 	}
 }
 
-func (r *CardRepository) Create(ctx context.Context, model entity.CardCard) error {
+func (r *CardRepository) Create(ctx context.Context, model *entity.Card) error {
 	sql, args, err := r.dbal.SqlBuilder().
-		Insert(consts.CardTableName).
+		Insert(cardTableName).
 		Columns(
-			consts.CardIdColumn,
-			consts.CardFrontContentColumn,
-			consts.CardBackContentColumn,
-			consts.CardCreatedAtColumn,
-			consts.CardUpdatedAtColumn,
+			cardIdColumn,
+			cardUserIdColumn,
+			cardQuestionColumn,
+			cardAnswerColumn,
+			cardFileTypeColumn,
+			cardFileIdColumn,
+			cardCreatedAtColumn,
+			cardUpdatedAtColumn,
 		).
 		Values(
-			model.Id(),
-			model.FrontContent(),
-			model.BackContent(),
-			model.CreatedAt(),
-			model.UpdatedAt(),
+			model.Id,
+			model.UserId,
+			model.Question,
+			model.Answer,
+			model.FileType,
+			model.FileId,
+			model.CreatedAt,
+			model.UpdatedAt,
 		).
 		ToSql()
 

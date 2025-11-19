@@ -12,6 +12,7 @@ import (
 	logPkg "platform/pkg/logger"
 	"sync"
 	"syscall"
+	"telegram-bot/internal/adapter/grpc"
 	"telegram-bot/internal/adapter/postgresql"
 	"telegram-bot/internal/api/bot_handler"
 	"telegram-bot/internal/config"
@@ -56,6 +57,8 @@ func run(cfg *config.Config) error {
 
 	validator := validatorPkg.New(validatorPkg.WithRequiredStructEnabled())
 
+	cardClient := grpc.NewCardClient()
+
 	dialogRepository := postgresql.NewDialogRepository(dbal)
 	userRepository := postgresql.NewUserRepository(dbal)
 
@@ -63,7 +66,7 @@ func run(cfg *config.Config) error {
 	dialogUpdateHandler := command.NewDialogUpdateHandler(dialogRepository)
 	userFirstOrCreateHandler := command.NewUserFirstOrCreateHandler(userRepository, validator)
 
-	h := bot_handler.NewBotHandler(userFirstOrCreateHandler, dialogFirstOrCreateHandler, dialogUpdateHandler, log)
+	h := bot_handler.NewBotHandler(userFirstOrCreateHandler, dialogFirstOrCreateHandler, dialogUpdateHandler, cardClient, log)
 	defer h.Close()
 
 	b, err := bot.New(cfg.Telegram.BotToken, bot.WithDefaultHandler(h.Handle))

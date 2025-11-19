@@ -65,7 +65,7 @@ func (s *GrpcServer) Start() error {
 		}),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_recovery.UnaryServerInterceptor(),
-			InterceptorRequestId(),
+			//InterceptorRequestId(),
 			grpc_logging.UnaryServerInterceptor(InterceptorLogger(s.log), grpc_logging.WithLogOnEvents(grpc_logging.StartCall, grpc_logging.FinishCall)),
 		)),
 	)

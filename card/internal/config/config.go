@@ -8,8 +8,8 @@ import (
 type Config struct {
 	App      AppConfig
 	Database DatabaseConfig
-	Log      LogConfig
 	GRPC     GRPCConfig
+	Log      LogConfig
 }
 
 func Load(path ...string) (*Config, error) {

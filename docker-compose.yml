@@ -9,20 +9,20 @@ services:
       context: .
       target: development
     volumes:
-      - .:/app
-    environment:
-      VIRTUAL_HOST: card.$DOCKER_DOMAIN_NAME
-      VIRTUAL_PROTO: grpc
-      VIRTUAL_PORT: 50051
-      HTTP_PORT: 50051
-      HTTPS_METHOD: nohttps
+      - ./:/app
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.grpc.loadbalancer.server.port=50051"
+      - "traefik.http.services.grpc.loadbalancer.server.scheme=h2c"
+      - "traefik.http.routers.grpc.rule=Host(`card.sm2.docker`)"
+      - "traefik.http.routers.grpc.entrypoints=grpc"
     command: air -c /app/card/.air.toml
     extra_hosts:
       - host.docker.internal:host-gateway
     networks:
-      development:
-        aliases:
-          - card.$DOCKER_DOMAIN_NAME
+      - development
 
   telegram-bot:
     build:
@@ -34,6 +34,4 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     networks:
-      development:
-        aliases:
-          - telegram-bot.$DOCKER_DOMAIN_NAME
+      - development

@@ -31,17 +31,22 @@ func NewCardImpl(props CardImplProps) *CardImpl {
 	}
 }
 
-func (s *CardImpl) Create(ctx context.Context, request *card.CreateRequest) (*card.CreateResponse, error) {
+func (s *CardImpl) Create(ctx context.Context, req *card.CreateRequest) (*card.CreateResponse, error) {
 	s.log.InfoCtx(
 		ctx,
-		"incoming request",
-		zap.String("front_content", request.FrontContent),
-		zap.String("back_content", request.BackContent),
+		"Incoming create request",
+		zap.String("question", req.Question),
+		zap.String("answer", req.Answer),
+		zap.String("file_type", req.FileType.String()),
+		zap.String("file_id", req.FileId),
 	)
 
-	cmd := command.CardCreateCmd{
-		FrontContent: request.FrontContent,
-		BackContent:  request.BackContent,
+	cmd := command.CreateCardCmd{
+		UserId:   req.UserId,
+		Question: req.Question,
+		Answer:   req.Answer,
+		FileType: req.FileType.String(),
+		FileId:   req.FileId,
 	}
 
 	e, err := s.cardCreateHandler.Handle(ctx, cmd)
@@ -52,9 +57,11 @@ func (s *CardImpl) Create(ctx context.Context, request *card.CreateRequest) (*ca
 
 	return &card.CreateResponse{
 		Card: &card.Card{
-			Id:           e.Id().String(),
-			FrontContent: e.FrontContent(),
-			BackContent:  e.BackContent(),
+			Id:       e.Id.String(),
+			Question: e.Question,
+			Answer:   e.Answer,
+			FileType: card.FileType(card.FileType_value[string(e.FileType)]),
+			FileId:   e.FileId,
 		},
 	}, nil
 }

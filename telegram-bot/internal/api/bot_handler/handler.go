@@ -7,6 +7,7 @@ import (
 	"github.com/go-telegram/bot/models"
 	"go.uber.org/zap"
 	"platform/pkg/logger"
+	"telegram-bot/internal/client/card"
 	"telegram-bot/internal/domain/entity"
 	"telegram-bot/internal/usercase/command"
 	"telegram-bot/pkg/flow"
@@ -23,6 +24,7 @@ type BotHandler struct {
 	userFirstOrCreateHandler   *command.UserFirstOrCreateHandler
 	dialogFirstOrCreateHandler *command.DialogFirstOrCreateHandler
 	dialogUpdateHandler        *command.DialogUpdateHandler
+	cardClient                 card.CardClientInterface
 	log                        *logger.Logger
 
 	f     *flow.Flow
@@ -34,18 +36,28 @@ func NewBotHandler(
 	userFirstOrCreateHandler *command.UserFirstOrCreateHandler,
 	dialogFirstOrCreateHandler *command.DialogFirstOrCreateHandler,
 	dialogUpdateHandler *command.DialogUpdateHandler,
+	cardClient card.CardClientInterface,
 	log *logger.Logger,
 ) *BotHandler {
 	b := &BotHandler{
 		userFirstOrCreateHandler:   userFirstOrCreateHandler,
 		dialogFirstOrCreateHandler: dialogFirstOrCreateHandler,
 		dialogUpdateHandler:        dialogUpdateHandler,
+		cardClient:                 cardClient,
 		log:                        log,
 	}
 
 	f := flow.NewBuilder().
 		Before(b.createBefore()).
 		Step(b.createNoneStep()).
+		Step(b.createCardCreateStep()).
+		Step(b.createCardCreateInputQuestionStep()).
+		Step(b.createCardCreateImageStep()).
+		Step(b.createCardCreateInputImageStep()).
+		Step(b.createCardCreateAnswerStep()).
+		Step(b.createCardCreateInputAnswerStep()).
+		Step(b.createCardCreateRecapStep()).
+		Step(b.createCardCreateDoneStep()).
 		After(b.createAfter()).
 		UnhandledState(func(ctx context.Context, step, prevStep string, args []any) {
 			fmt.Printf("Unhandled step: %s\n", step)

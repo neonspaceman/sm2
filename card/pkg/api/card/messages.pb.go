@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.27.1
 // 	protoc        v3.21.12
-// source: proto/card/messages.proto
+// source: card/messages.proto
 
 package card
 
@@ -20,20 +20,71 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type FileType int32
+
+const (
+	FileType_NONE     FileType = 0
+	FileType_PHOTO    FileType = 1
+	FileType_DOCUMENT FileType = 2
+)
+
+// Enum value maps for FileType.
+var (
+	FileType_name = map[int32]string{
+		0: "NONE",
+		1: "PHOTO",
+		2: "DOCUMENT",
+	}
+	FileType_value = map[string]int32{
+		"NONE":     0,
+		"PHOTO":    1,
+		"DOCUMENT": 2,
+	}
+)
+
+func (x FileType) Enum() *FileType {
+	p := new(FileType)
+	*p = x
+	return p
+}
+
+func (x FileType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FileType) Descriptor() protoreflect.EnumDescriptor {
+	return file_card_messages_proto_enumTypes[0].Descriptor()
+}
+
+func (FileType) Type() protoreflect.EnumType {
+	return &file_card_messages_proto_enumTypes[0]
+}
+
+func (x FileType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FileType.Descriptor instead.
+func (FileType) EnumDescriptor() ([]byte, []int) {
+	return file_card_messages_proto_rawDescGZIP(), []int{0}
+}
+
 type Card struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id           string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	FrontContent string `protobuf:"bytes,2,opt,name=front_content,json=frontContent,proto3" json:"front_content,omitempty"`
-	BackContent  string `protobuf:"bytes,3,opt,name=back_content,json=backContent,proto3" json:"back_content,omitempty"`
+	Id       string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Question string   `protobuf:"bytes,2,opt,name=question,proto3" json:"question,omitempty"`
+	Answer   string   `protobuf:"bytes,3,opt,name=answer,proto3" json:"answer,omitempty"`
+	FileType FileType `protobuf:"varint,4,opt,name=file_type,json=fileType,proto3,enum=sm2.api.card.FileType" json:"file_type,omitempty"`
+	FileId   string   `protobuf:"bytes,5,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
 }
 
 func (x *Card) Reset() {
 	*x = Card{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_card_messages_proto_msgTypes[0]
+		mi := &file_card_messages_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -46,7 +97,7 @@ func (x *Card) String() string {
 func (*Card) ProtoMessage() {}
 
 func (x *Card) ProtoReflect() protoreflect.Message {
-	mi := &file_api_card_messages_proto_msgTypes[0]
+	mi := &file_card_messages_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +110,7 @@ func (x *Card) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Card.ProtoReflect.Descriptor instead.
 func (*Card) Descriptor() ([]byte, []int) {
-	return file_api_card_messages_proto_rawDescGZIP(), []int{0}
+	return file_card_messages_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Card) GetId() string {
@@ -69,16 +120,30 @@ func (x *Card) GetId() string {
 	return ""
 }
 
-func (x *Card) GetFrontContent() string {
+func (x *Card) GetQuestion() string {
 	if x != nil {
-		return x.FrontContent
+		return x.Question
 	}
 	return ""
 }
 
-func (x *Card) GetBackContent() string {
+func (x *Card) GetAnswer() string {
 	if x != nil {
-		return x.BackContent
+		return x.Answer
+	}
+	return ""
+}
+
+func (x *Card) GetFileType() FileType {
+	if x != nil {
+		return x.FileType
+	}
+	return FileType_NONE
+}
+
+func (x *Card) GetFileId() string {
+	if x != nil {
+		return x.FileId
 	}
 	return ""
 }
@@ -88,14 +153,17 @@ type CreateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FrontContent string `protobuf:"bytes,1,opt,name=front_content,json=frontContent,proto3" json:"front_content,omitempty"`
-	BackContent  string `protobuf:"bytes,2,opt,name=back_content,json=backContent,proto3" json:"back_content,omitempty"`
+	UserId   string   `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Question string   `protobuf:"bytes,2,opt,name=question,proto3" json:"question,omitempty"`
+	Answer   string   `protobuf:"bytes,3,opt,name=answer,proto3" json:"answer,omitempty"`
+	FileType FileType `protobuf:"varint,4,opt,name=file_type,json=fileType,proto3,enum=sm2.api.card.FileType" json:"file_type,omitempty"`
+	FileId   string   `protobuf:"bytes,5,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
 }
 
 func (x *CreateRequest) Reset() {
 	*x = CreateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_card_messages_proto_msgTypes[1]
+		mi := &file_card_messages_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -108,7 +176,7 @@ func (x *CreateRequest) String() string {
 func (*CreateRequest) ProtoMessage() {}
 
 func (x *CreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_card_messages_proto_msgTypes[1]
+	mi := &file_card_messages_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,19 +189,40 @@ func (x *CreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRequest.ProtoReflect.Descriptor instead.
 func (*CreateRequest) Descriptor() ([]byte, []int) {
-	return file_api_card_messages_proto_rawDescGZIP(), []int{1}
+	return file_card_messages_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateRequest) GetFrontContent() string {
+func (x *CreateRequest) GetUserId() string {
 	if x != nil {
-		return x.FrontContent
+		return x.UserId
 	}
 	return ""
 }
 
-func (x *CreateRequest) GetBackContent() string {
+func (x *CreateRequest) GetQuestion() string {
 	if x != nil {
-		return x.BackContent
+		return x.Question
+	}
+	return ""
+}
+
+func (x *CreateRequest) GetAnswer() string {
+	if x != nil {
+		return x.Answer
+	}
+	return ""
+}
+
+func (x *CreateRequest) GetFileType() FileType {
+	if x != nil {
+		return x.FileType
+	}
+	return FileType_NONE
+}
+
+func (x *CreateRequest) GetFileId() string {
+	if x != nil {
+		return x.FileId
 	}
 	return ""
 }
@@ -149,7 +238,7 @@ type CreateResponse struct {
 func (x *CreateResponse) Reset() {
 	*x = CreateResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_card_messages_proto_msgTypes[2]
+		mi := &file_card_messages_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -162,7 +251,7 @@ func (x *CreateResponse) String() string {
 func (*CreateResponse) ProtoMessage() {}
 
 func (x *CreateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_card_messages_proto_msgTypes[2]
+	mi := &file_card_messages_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -175,7 +264,7 @@ func (x *CreateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateResponse.ProtoReflect.Descriptor instead.
 func (*CreateResponse) Descriptor() ([]byte, []int) {
-	return file_api_card_messages_proto_rawDescGZIP(), []int{2}
+	return file_card_messages_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreateResponse) GetCard() *Card {
@@ -185,65 +274,81 @@ func (x *CreateResponse) GetCard() *Card {
 	return nil
 }
 
-var File_api_card_messages_proto protoreflect.FileDescriptor
+var File_card_messages_proto protoreflect.FileDescriptor
 
-var file_api_card_messages_proto_rawDesc = []byte{
-	0x0a, 0x17, 0x61, 0x70, 0x69, 0x2f, 0x63, 0x61, 0x72, 0x64, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0c, 0x73, 0x6d, 0x32, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x63, 0x61, 0x72, 0x64, 0x22, 0x5e, 0x0a, 0x04, 0x43, 0x61, 0x72, 0x64, 0x12,
-	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12,
-	0x23, 0x0a, 0x0d, 0x66, 0x72, 0x6f, 0x6e, 0x74, 0x5f, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x66, 0x72, 0x6f, 0x6e, 0x74, 0x43, 0x6f, 0x6e,
-	0x74, 0x65, 0x6e, 0x74, 0x12, 0x21, 0x0a, 0x0c, 0x62, 0x61, 0x63, 0x6b, 0x5f, 0x63, 0x6f, 0x6e,
-	0x74, 0x65, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x62, 0x61, 0x63, 0x6b,
-	0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x57, 0x0a, 0x0d, 0x43, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x66, 0x72, 0x6f, 0x6e,
-	0x74, 0x5f, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x0c, 0x66, 0x72, 0x6f, 0x6e, 0x74, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12, 0x21, 0x0a,
-	0x0c, 0x62, 0x61, 0x63, 0x6b, 0x5f, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x0b, 0x62, 0x61, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74,
-	0x22, 0x38, 0x0a, 0x0e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x26, 0x0a, 0x04, 0x63, 0x61, 0x72, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x12, 0x2e, 0x73, 0x6d, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x61, 0x72, 0x64, 0x2e,
-	0x43, 0x61, 0x72, 0x64, 0x52, 0x04, 0x63, 0x61, 0x72, 0x64, 0x42, 0x18, 0x5a, 0x16, 0x63, 0x61,
-	0x72, 0x64, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x63, 0x61, 0x72, 0x64, 0x3b,
-	0x63, 0x61, 0x72, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+var file_card_messages_proto_rawDesc = []byte{
+	0x0a, 0x13, 0x63, 0x61, 0x72, 0x64, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0c, 0x73, 0x6d, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63,
+	0x61, 0x72, 0x64, 0x22, 0x98, 0x01, 0x0a, 0x04, 0x43, 0x61, 0x72, 0x64, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x6e, 0x73, 0x77,
+	0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x6e, 0x73, 0x77, 0x65, 0x72,
+	0x12, 0x33, 0x0a, 0x09, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x16, 0x2e, 0x73, 0x6d, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x61,
+	0x72, 0x64, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x54, 0x79, 0x70, 0x65, 0x52, 0x08, 0x66, 0x69, 0x6c,
+	0x65, 0x54, 0x79, 0x70, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x69, 0x64,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x64, 0x22, 0xaa,
+	0x01, 0x0a, 0x0d, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x12, 0x33, 0x0a,
+	0x09, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e,
+	0x32, 0x16, 0x2e, 0x73, 0x6d, 0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x61, 0x72, 0x64, 0x2e,
+	0x46, 0x69, 0x6c, 0x65, 0x54, 0x79, 0x70, 0x65, 0x52, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x54, 0x79,
+	0x70, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x64, 0x22, 0x38, 0x0a, 0x0e, 0x43,
+	0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x26, 0x0a,
+	0x04, 0x63, 0x61, 0x72, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x73, 0x6d,
+	0x32, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x61, 0x72, 0x64, 0x2e, 0x43, 0x61, 0x72, 0x64, 0x52,
+	0x04, 0x63, 0x61, 0x72, 0x64, 0x2a, 0x2d, 0x0a, 0x08, 0x46, 0x69, 0x6c, 0x65, 0x54, 0x79, 0x70,
+	0x65, 0x12, 0x08, 0x0a, 0x04, 0x4e, 0x4f, 0x4e, 0x45, 0x10, 0x00, 0x12, 0x09, 0x0a, 0x05, 0x50,
+	0x48, 0x4f, 0x54, 0x4f, 0x10, 0x01, 0x12, 0x0c, 0x0a, 0x08, 0x44, 0x4f, 0x43, 0x55, 0x4d, 0x45,
+	0x4e, 0x54, 0x10, 0x02, 0x42, 0x18, 0x5a, 0x16, 0x63, 0x61, 0x72, 0x64, 0x2f, 0x70, 0x6b, 0x67,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x63, 0x61, 0x72, 0x64, 0x3b, 0x63, 0x61, 0x72, 0x64, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_api_card_messages_proto_rawDescOnce sync.Once
-	file_api_card_messages_proto_rawDescData = file_api_card_messages_proto_rawDesc
+	file_card_messages_proto_rawDescOnce sync.Once
+	file_card_messages_proto_rawDescData = file_card_messages_proto_rawDesc
 )
 
-func file_api_card_messages_proto_rawDescGZIP() []byte {
-	file_api_card_messages_proto_rawDescOnce.Do(func() {
-		file_api_card_messages_proto_rawDescData = protoimpl.X.CompressGZIP(file_api_card_messages_proto_rawDescData)
+func file_card_messages_proto_rawDescGZIP() []byte {
+	file_card_messages_proto_rawDescOnce.Do(func() {
+		file_card_messages_proto_rawDescData = protoimpl.X.CompressGZIP(file_card_messages_proto_rawDescData)
 	})
-	return file_api_card_messages_proto_rawDescData
+	return file_card_messages_proto_rawDescData
 }
 
-var file_api_card_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_api_card_messages_proto_goTypes = []interface{}{
-	(*Card)(nil),           // 0: sm2.proto.card.Card
-	(*CreateRequest)(nil),  // 1: sm2.proto.card.CreateRequest
-	(*CreateResponse)(nil), // 2: sm2.proto.card.CreateResponse
+var file_card_messages_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_card_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_card_messages_proto_goTypes = []interface{}{
+	(FileType)(0),          // 0: sm2.api.card.FileType
+	(*Card)(nil),           // 1: sm2.api.card.Card
+	(*CreateRequest)(nil),  // 2: sm2.api.card.CreateRequest
+	(*CreateResponse)(nil), // 3: sm2.api.card.CreateResponse
 }
-var file_api_card_messages_proto_depIdxs = []int32{
-	0, // 0: sm2.proto.card.CreateResponse.card:type_name -> sm2.proto.card.Card
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+var file_card_messages_proto_depIdxs = []int32{
+	0, // 0: sm2.api.card.Card.file_type:type_name -> sm2.api.card.FileType
+	0, // 1: sm2.api.card.CreateRequest.file_type:type_name -> sm2.api.card.FileType
+	1, // 2: sm2.api.card.CreateResponse.card:type_name -> sm2.api.card.Card
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
-func init() { file_api_card_messages_proto_init() }
-func file_api_card_messages_proto_init() {
-	if File_api_card_messages_proto != nil {
+func init() { file_card_messages_proto_init() }
+func file_card_messages_proto_init() {
+	if File_card_messages_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_api_card_messages_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_card_messages_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Card); i {
 			case 0:
 				return &v.state
@@ -255,7 +360,7 @@ func file_api_card_messages_proto_init() {
 				return nil
 			}
 		}
-		file_api_card_messages_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_card_messages_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CreateRequest); i {
 			case 0:
 				return &v.state
@@ -267,7 +372,7 @@ func file_api_card_messages_proto_init() {
 				return nil
 			}
 		}
-		file_api_card_messages_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_card_messages_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CreateResponse); i {
 			case 0:
 				return &v.state
@@ -284,18 +389,19 @@ func file_api_card_messages_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_api_card_messages_proto_rawDesc,
-			NumEnums:      0,
+			RawDescriptor: file_card_messages_proto_rawDesc,
+			NumEnums:      1,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_api_card_messages_proto_goTypes,
-		DependencyIndexes: file_api_card_messages_proto_depIdxs,
-		MessageInfos:      file_api_card_messages_proto_msgTypes,
+		GoTypes:           file_card_messages_proto_goTypes,
+		DependencyIndexes: file_card_messages_proto_depIdxs,
+		EnumInfos:         file_card_messages_proto_enumTypes,
+		MessageInfos:      file_card_messages_proto_msgTypes,
 	}.Build()
-	File_api_card_messages_proto = out.File
-	file_api_card_messages_proto_rawDesc = nil
-	file_api_card_messages_proto_goTypes = nil
-	file_api_card_messages_proto_depIdxs = nil
+	File_card_messages_proto = out.File
+	file_card_messages_proto_rawDesc = nil
+	file_card_messages_proto_goTypes = nil
+	file_card_messages_proto_depIdxs = nil
 }
