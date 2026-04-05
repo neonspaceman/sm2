@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"card/internal/usecase/command"
+	"card/internal/usecase/query"
 	"card/pkg/api/card"
 	"context"
 	"errors"
@@ -14,59 +15,28 @@ import (
 )
 
 type CardImplProps struct {
-	Log               *logger.Logger
-	CardCreateHandler *command.CardCreateHandler
+	Log                   *logger.Logger
+	CreateCardHandler     *command.CardCreateHandler
+	GetCardsByUserIdQuery *query.GetCardByUserIdHandler
 }
 
 type CardImpl struct {
 	card.UnimplementedCardServiceServer
-	log               *logger.Logger
-	cardCreateHandler *command.CardCreateHandler
+	log                   *logger.Logger
+	cardCreateHandler     *command.CardCreateHandler
+	getCardsByUserIdQuery *query.GetCardByUserIdHandler
 }
 
 func NewCardImpl(props CardImplProps) *CardImpl {
 	return &CardImpl{
-		log:               props.Log,
-		cardCreateHandler: props.CardCreateHandler,
+		log:                   props.Log,
+		cardCreateHandler:     props.CreateCardHandler,
+		getCardsByUserIdQuery: props.GetCardsByUserIdQuery,
 	}
 }
 
-func (s *CardImpl) Create(ctx context.Context, req *card.CreateRequest) (*card.CreateResponse, error) {
-	s.log.InfoCtx(
-		ctx,
-		"Incoming create request",
-		zap.String("question", req.Question),
-		zap.String("answer", req.Answer),
-		zap.String("file_type", req.FileType.String()),
-		zap.String("file_id", req.FileId),
-	)
-
-	cmd := command.CreateCardCmd{
-		UserId:   req.UserId,
-		Question: req.Question,
-		Answer:   req.Answer,
-		FileType: req.FileType.String(),
-		FileId:   req.FileId,
-	}
-
-	e, err := s.cardCreateHandler.Handle(ctx, cmd)
-
-	if err != nil {
-		return nil, s.handleError(ctx, err)
-	}
-
-	return &card.CreateResponse{
-		Card: &card.Card{
-			Id:       e.Id.String(),
-			Question: e.Question,
-			Answer:   e.Answer,
-			FileType: card.FileType(card.FileType_value[string(e.FileType)]),
-			FileId:   e.FileId,
-		},
-	}, nil
-}
-
-func (s *CardImpl) handleError(ctx context.Context, err error) error {
+// TODO: change to interceptor?
+func (c *CardImpl) handleError(ctx context.Context, err error) error {
 	var validationErrors validator.ValidationErrors
 
 	if errors.As(err, &validationErrors) {
@@ -82,7 +52,7 @@ func (s *CardImpl) handleError(ctx context.Context, err error) error {
 		return grpcStatus.Err()
 	}
 
-	s.log.ErrorCtx(ctx, "internal error", zap.String("error", err.Error()))
+	c.log.ErrorCtx(ctx, "internal error", zap.String("error", err.Error()))
 
 	return status.Error(codes.Internal, err.Error())
 }

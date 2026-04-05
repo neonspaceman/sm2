@@ -32,8 +32,8 @@ func NewCreateCardHandler(
 	}
 }
 
-func (s *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*entityPkg.Card, error) {
-	err := s.validate.Struct(&cmd)
+func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*entityPkg.Card, error) {
+	err := h.validate.Struct(&cmd)
 
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (s *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*ent
 		return nil, err
 	}
 
-	entity := entityPkg.NewCard(
+	card, err := entityPkg.NewCard(
 		userId,
 		cmd.Answer,
 		cmd.Question,
@@ -53,11 +53,15 @@ func (s *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*ent
 		cmd.FileId,
 	)
 
-	err = s.repository.Create(ctx, entity)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.repository.Create(ctx, card)
 
 	if err != nil {
 		return nil, fmt.Errorf("create new card: %w", err)
 	}
 
-	return entity, nil
+	return card, nil
 }

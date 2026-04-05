@@ -14,11 +14,11 @@ services:
       - .env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.grpc.loadbalancer.server.port=50051"
-      - "traefik.http.services.grpc.loadbalancer.server.scheme=h2c"
-      - "traefik.http.routers.grpc.rule=Host(`card.sm2.docker`)"
-      - "traefik.http.routers.grpc.entrypoints=grpc"
-    command: air -c /app/card/.air.toml
+      - "traefik.http.services.card-grpc.loadbalancer.server.port=50051"
+      - "traefik.http.services.card-grpc.loadbalancer.server.scheme=h2c"
+      - "traefik.http.routers.card-grpc.rule=Host(`card.sm2.docker`)"
+      - "traefik.http.routers.card-grpc.entrypoints=grpc"
+    command: air -c /app/card/cmd/grpc_server/.air.toml
     extra_hosts:
       - host.docker.internal:host-gateway
     networks:
@@ -30,7 +30,26 @@ services:
       target: development
     volumes:
       - .:/app
-    command: air -c /app/telegram-bot/.air.toml
+    command: air -c /app/telegram-bot/cmd/bot/.air.toml
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - development
+
+  telegram-miniapp:
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.miniapp-http.loadbalancer.server.port=8080"
+      - "traefik.http.routers.miniapp-http.rule=Host(`miniapp.sm2.docker`)"
+      - "traefik.http.routers.miniapp-http.entrypoints=http"
+    command: air -c /app/telegram-bot/cmd/miniapp/.air.toml
     extra_hosts:
       - host.docker.internal:host-gateway
     networks:

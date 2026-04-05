@@ -6,7 +6,7 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
-	"platform/pkg/dbal"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"telegram-bot/internal/domain/entity"
 )
 
@@ -19,48 +19,50 @@ const (
 )
 
 type UserRepository struct {
-	dbal *dbal.DBAL
+	conn *pgxpool.Pool
 }
 
-func NewUserRepository(dbal *dbal.DBAL) *UserRepository {
+func NewUserRepository(conn *pgxpool.Pool) *UserRepository {
 	return &UserRepository{
-		dbal: dbal,
+		conn: conn,
 	}
 }
+
+var selectUser = sq.
+	Select(
+		userIdColumn,
+		userChatIdColumn,
+		userFirstNameColumn,
+		userCreatedAtColumn,
+	).
+	From(userTableName).
+	PlaceholderFormat(sq.Dollar)
 
 func (r *UserRepository) FindByChatId(ctx context.Context, chatId int64) (*entity.User, error) {
-	sql, args, err := r.dbal.SqlBuilder().
-		Select(
-			userIdColumn,
-			userChatIdColumn,
-			userFirstNameColumn,
-			userCreatedAtColumn,
-		).
-		From(userTableName).
+	sql, args := selectUser.
 		Where(sq.Eq{userChatIdColumn: chatId}).
-		ToSql()
+		MustSql()
 
+	rows, err := r.conn.Query(ctx, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("build sql: %w", err)
+		return nil, fmt.Errorf("query_builder: %w", err)
 	}
 
-	m := &entity.User{}
-
-	err = r.dbal.ScanOne(ctx, m, sql, args...)
+	model, err := pgx.CollectOneRow(rows, pgx.RowToAddrOfStructByName[entity.User])
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("scan one: %w", err)
+		return nil, fmt.Errorf("collect one: %w", err)
 	}
 
-	return m, nil
+	return model, nil
 }
 
 func (r *UserRepository) Create(ctx context.Context, model *entity.User) error {
-	sql, args, err := r.dbal.SqlBuilder().
+	sql, args := sq.
 		Insert(userTableName).
 		Columns(
 			userIdColumn,
@@ -74,13 +76,12 @@ func (r *UserRepository) Create(ctx context.Context, model *entity.User) error {
 			model.FirstName,
 			model.CreatedAt,
 		).
-		ToSql()
+		PlaceholderFormat(sq.Dollar).
+		MustSql()
 
-	if err != nil {
-		return fmt.Errorf("build sql: %w", err)
-	}
+	fmt.Println(sql, args)
 
-	_, err = r.dbal.Exec(ctx, sql, args...)
+	_, err := r.conn.Exec(ctx, sql, args...)
 
 	if err != nil {
 		return fmt.Errorf("execute sql \"%s\": %w", sql, err)

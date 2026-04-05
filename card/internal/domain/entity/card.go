@@ -24,11 +24,17 @@ type Card struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func NewCard(UserId uuid.UUID, Question, Answer string, FileType FileType, FileId string) *Card {
+func NewCard(UserId uuid.UUID, Question, Answer string, FileType FileType, FileId string) (*Card, error) {
 	now := time.Now()
 
+	id, err := uuid.NewV7()
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &Card{
-		Id:        uuid.New(),
+		Id:        id,
 		UserId:    UserId,
 		Question:  Question,
 		Answer:    Answer,
@@ -36,5 +42,5 @@ func NewCard(UserId uuid.UUID, Question, Answer string, FileType FileType, FileI
 		FileId:    FileId,
 		CreatedAt: now,
 		UpdatedAt: now,
-	}
+	}, nil
 }

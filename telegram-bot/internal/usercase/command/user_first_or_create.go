@@ -2,39 +2,25 @@ package command
 
 import (
 	"context"
-	"github.com/go-playground/validator/v10"
+	initdata "github.com/telegram-mini-apps/init-data-golang"
 	"telegram-bot/internal/domain/entity"
 	"telegram-bot/internal/domain/repository"
 )
 
-type UserFirstOrCreateCmd struct {
-	ChatId    int64  `validate:"required"`
-	FirstName string `validate:"required"`
-}
-
 type UserFirstOrCreateHandler struct {
 	repository repository.UserRepositoryInterface
-	validate   *validator.Validate
 }
 
 func NewUserFirstOrCreateHandler(
 	repository repository.UserRepositoryInterface,
-	validate *validator.Validate,
 ) *UserFirstOrCreateHandler {
 	return &UserFirstOrCreateHandler{
 		repository: repository,
-		validate:   validate,
 	}
 }
 
-func (h *UserFirstOrCreateHandler) Handle(ctx context.Context, cmd UserFirstOrCreateCmd) (*entity.User, error) {
-	err := h.validate.Struct(cmd)
-
-	if err != nil {
-		return nil, err
-	}
-
-	u, err := h.repository.FindByChatId(ctx, cmd.ChatId)
+func (h *UserFirstOrCreateHandler) Handle(ctx context.Context, data *initdata.InitData) (*entity.User, error) {
+	u, err := h.repository.FindByChatId(ctx, data.Chat.ID)
 
 	if err != nil {
 		return nil, err
@@ -44,7 +30,7 @@ func (h *UserFirstOrCreateHandler) Handle(ctx context.Context, cmd UserFirstOrCr
 		return u, nil
 	}
 
-	u = entity.NewUser(cmd.ChatId, cmd.FirstName)
+	u = entity.NewUser(data.Chat.ID, data.User.FirstName)
 
 	err = h.repository.Create(ctx, u)
 

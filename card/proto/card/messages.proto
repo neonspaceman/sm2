@@ -29,3 +29,15 @@ message CreateRequest {
 message CreateResponse {
   Card card = 1;
 }
+
+message GetByUserIdRequest {
+  string user_id = 1;
+  uint64 limit = 2;
+  string after = 3;
+}
+
+message GetByUserIdResponse {
+  repeated Card cards = 1;
+  string end_cursor = 2;
+  bool has_next = 3;
+}

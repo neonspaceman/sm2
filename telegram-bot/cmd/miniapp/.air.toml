@@ -1,0 +1,15 @@
+root = "/app/telegram-bot"
+tmp_dir = "/tmp"
+
+[build]
+bin = "/tmp/telegram-bot"
+args_bin=["--env=/app/telegram-bot/.env"]
+cmd = "go build -o /tmp/telegram-bot /app/telegram-bot/cmd/miniapp/main.go"
+delay = 1000
+exclude_dir = []
+exclude_regex = ["_test.go"]
+log = "build-errors.log"
+stop_on_error = true
+
+[misc]
+clean_on_exit = true

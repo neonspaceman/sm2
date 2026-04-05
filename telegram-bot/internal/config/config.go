@@ -10,6 +10,7 @@ type Config struct {
 	Database DatabaseConfig
 	Log      LogConfig
 	Telegram TelegramConfig
+	GRPC     GRCPConfig
 }
 
 func Load(path ...string) (*Config, error) {

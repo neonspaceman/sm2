@@ -3,18 +3,23 @@ package grpc
 import (
 	"card/pkg/api/card"
 	"context"
+	"github.com/google/uuid"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	cardPkg "telegram-bot/internal/client/card"
+	"platform/pkg/request_id"
+	card_client "telegram-bot/internal/client/card"
+	"telegram-bot/internal/config"
+	"telegram-bot/internal/consts"
 )
 
 type CardClient struct {
 	grpc card.CardServiceClient
 }
 
-func NewCardClient() *CardClient {
+func NewCardClient(cfg *config.Config) *CardClient {
 	conn, err := grpc.NewClient(
-		"card:50051",
+		cfg.GRPC.CardURI,
 		//grpc.WithChainUnaryInterceptor(InterceptorRequestId()),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -28,7 +33,7 @@ func NewCardClient() *CardClient {
 	return &CardClient{grpc: grpcClient}
 }
 
-func (c *CardClient) Create(ctx context.Context, req cardPkg.CreateRequestDto) error {
+func (c *CardClient) Create(ctx context.Context, req card_client.CreateCardDto) error {
 	grpcRequest := &card.CreateRequest{
 		UserId:   req.UserId,
 		Question: req.Question,
@@ -36,10 +41,10 @@ func (c *CardClient) Create(ctx context.Context, req cardPkg.CreateRequestDto) e
 	}
 
 	switch req.FileType {
-	case cardPkg.FileTypePhoto:
+	case card_client.FileTypePhoto:
 		grpcRequest.FileId = req.FileId
 		grpcRequest.FileType = card.FileType_PHOTO
-	case cardPkg.FileTypeDocument:
+	case card_client.FileTypeDocument:
 		grpcRequest.FileId = req.FileId
 		grpcRequest.FileType = card.FileType_DOCUMENT
 	}
@@ -53,18 +58,40 @@ func (c *CardClient) Create(ctx context.Context, req cardPkg.CreateRequestDto) e
 	return nil
 }
 
-//func InterceptorRequestId() grpc.UnaryClientInterceptor {
-//	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-//		requestId := request_id.CtxGet(ctx)
-//
-//		if requestId != "" {
-//			requestId += ","
-//		}
-//
-//		requestId += uuid.NewString()
-//
-//		ctx = metadata.ExtractOutgoing(ctx).Set(consts.GrpcRequestIdKey, requestId).ToOutgoing(ctx)
-//
-//		return invoker(ctx, method, req, reply, cc, opts...)
-//	}
-//}
+func (c *CardClient) GetCards(ctx context.Context, userId uuid.UUID, limit uint64, after string) ([]*card_client.Card, bool, string, error) {
+	req := &card.GetByUserIdRequest{
+		UserId: userId.String(),
+		Limit:  limit,
+		After:  after,
+	}
+
+	response, err := c.grpc.GetByUserId(ctx, req)
+
+	if err != nil {
+		return nil, false, "", err
+	}
+
+	cards := make([]*card_client.Card, 0, len(response.Cards))
+
+	for _, v := range response.Cards {
+		cards = append(cards, card_client.ToCard(v))
+	}
+
+	return cards, response.HasNext, response.EndCursor, nil
+}
+
+func InterceptorRequestId() grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		requestId := request_id.CtxGet(ctx)
+
+		if requestId != "" {
+			requestId += ","
+		}
+
+		requestId += uuid.NewString()
+
+		ctx = metadata.ExtractOutgoing(ctx).Set(consts.GrpcRequestIdKey, requestId).ToOutgoing(ctx)
+
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
+}

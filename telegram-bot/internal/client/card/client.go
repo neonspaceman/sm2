@@ -1,7 +1,10 @@
 package card
 
-import "context"
+import (
+	"context"
+	"github.com/google/uuid"
+)
 
 type CardClientInterface interface {
-	Create(ctx context.Context, req CreateRequestDto) error
+	GetCards(ctx context.Context, userId uuid.UUID, limit uint64, cursor string) ([]*Card, bool, string, error)
 }

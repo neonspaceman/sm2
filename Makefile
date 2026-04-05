@@ -39,7 +39,7 @@ infrastructure-create-network: ## Create network
 .PHONY: infrastructure-up
 infrastructure-up: ## Up all infrastructure containers
 	make infrastructure-create-network && \
-	docker compose -f ./infrastructure/docker-compose.yml up -d
+	docker compose -f ./infrastructure/docker-compose.yml up
 
 .PHONY: infrastructure-down
 infrastructure-down: ## Down all infrastructure containers

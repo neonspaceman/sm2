@@ -18,18 +18,20 @@ services:
       - '8081:5432'
 
   traefik:
-    image: 'traefik:v3.5.4'
+    image: 'traefik:v3.6.12'
     ports:
+      - 80:80
       - 8080:8080
       - 50051:50051 # grpc
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command:
-#      - "--log.level=DEBUG"
+      - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.grpc.address=:50051"
+      - "--entrypoints.http.address=:80"
       - "--serversTransport.insecureSkipVerify=true"
     networks:
       - development

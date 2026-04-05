@@ -1,46 +1,36 @@
 package postgresql
 
 import (
+	"card/internal/consts"
 	"card/internal/domain/entity"
 	"context"
 	"fmt"
-	"platform/pkg/dbal"
-)
-
-const (
-	cardTableName       = "card"
-	cardIdColumn        = "id"
-	cardUserIdColumn    = "user_id"
-	cardQuestionColumn  = "question"
-	cardAnswerColumn    = "answer"
-	cardFileTypeColumn  = "file_type"
-	cardFileIdColumn    = "file_id"
-	cardCreatedAtColumn = "created_at"
-	cardUpdatedAtColumn = "updated_at"
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CardRepository struct {
-	dbal *dbal.DBAL
+	conn *pgxpool.Pool
 }
 
-func NewCardRepository(dbal *dbal.DBAL) *CardRepository {
+func NewCardRepository(conn *pgxpool.Pool) *CardRepository {
 	return &CardRepository{
-		dbal: dbal,
+		conn: conn,
 	}
 }
 
 func (r *CardRepository) Create(ctx context.Context, model *entity.Card) error {
-	sql, args, err := r.dbal.SqlBuilder().
-		Insert(cardTableName).
+	sql, args := sq.
+		Insert(consts.CardTableName).
 		Columns(
-			cardIdColumn,
-			cardUserIdColumn,
-			cardQuestionColumn,
-			cardAnswerColumn,
-			cardFileTypeColumn,
-			cardFileIdColumn,
-			cardCreatedAtColumn,
-			cardUpdatedAtColumn,
+			consts.CardIdColumn,
+			consts.CardUserIdColumn,
+			consts.CardQuestionColumn,
+			consts.CardAnswerColumn,
+			consts.CardFileTypeColumn,
+			consts.CardFileIdColumn,
+			consts.CardCreatedAtColumn,
+			consts.CardUpdatedAtColumn,
 		).
 		Values(
 			model.Id,
@@ -52,13 +42,10 @@ func (r *CardRepository) Create(ctx context.Context, model *entity.Card) error {
 			model.CreatedAt,
 			model.UpdatedAt,
 		).
-		ToSql()
+		PlaceholderFormat(sq.Dollar).
+		MustSql()
 
-	if err != nil {
-		return fmt.Errorf("build sql: %w", err)
-	}
-
-	_, err = r.dbal.Exec(ctx, sql, args...)
+	_, err := r.conn.Exec(ctx, sql, args...)
 
 	if err != nil {
 		return fmt.Errorf("execute sql \"%s\": %w", sql, err)

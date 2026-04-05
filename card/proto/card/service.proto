@@ -8,4 +8,5 @@ option go_package = "card/pkg/api/card;card";
 
 service CardService {
   rpc Create(CreateRequest) returns (CreateResponse);
+  rpc GetByUserId(GetByUserIdRequest) returns (GetByUserIdResponse);
 }
