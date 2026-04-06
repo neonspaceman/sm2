@@ -11,7 +11,7 @@ import (
 
 const authorizationKey = "tma"
 
-func TelegramAuth(botToken string, userFirstOrCreateHandler *command.UserFirstOrCreateHandler) gin.HandlerFunc {
+func TelegramAuth(botToken string, userFirstOrCreateHandler *command.FirstOrCreateUserHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authString := ctx.GetHeader("Authorization")
 

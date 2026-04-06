@@ -79,19 +79,21 @@ func run(cfg *config.Config) error {
 	userRepository := postgresql.NewUserRepository(conn)
 
 	getCardsHandler := query.NewGetCardByUserIdHandler(cardClient)
-	userFirstOrCreateHandler := command.NewUserFirstOrCreateHandler(userRepository)
+
+	firstOrCreateUserHandler := command.NewFirstOrCreateUserHandler(userRepository)
+	createCard := command.NewCreateCardHandler(cardClient)
 
 	// TODO: remove this is for test now
 	botToken := "5768337691:AAH5YkoiEuPk8-FZa32hStHTqXiLPtAEhx8"
 
 	r := gin.Default()
 	r.Use(
-		middleware.TelegramAuth(botToken, userFirstOrCreateHandler),
+		middleware.TelegramAuth(botToken, firstOrCreateUserHandler),
 		middleware.ErrorHandler(log),
 		gin.Recovery(),
 	)
 
-	cardHandler := rest.NewCardHandler(userFirstOrCreateHandler, getCardsHandler, validator)
+	cardHandler := rest.NewCardHandler(firstOrCreateUserHandler, getCardsHandler, createCard, validator)
 	cardHandler.RegisterRoutes(r)
 
 	// Start miniapp on port 8080 (default)

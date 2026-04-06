@@ -2,8 +2,7 @@ package query
 
 import (
 	"context"
-	"telegram-bot/internal/adapter/grpc"
-	"telegram-bot/internal/client/card"
+	card_client "telegram-bot/internal/client/card"
 	"telegram-bot/internal/domain/entity"
 )
 
@@ -14,17 +13,17 @@ type GetCardsByUserIdQuery struct {
 }
 
 type GetCardByUserIdHandler struct {
-	cardClient *grpc.CardClient
+	cardClient card_client.CardClientInterface
 }
 
 func NewGetCardByUserIdHandler(
-	cardClient *grpc.CardClient,
+	cardClient card_client.CardClientInterface,
 ) *GetCardByUserIdHandler {
 	return &GetCardByUserIdHandler{
 		cardClient: cardClient,
 	}
 }
 
-func (h *GetCardByUserIdHandler) Handle(ctx context.Context, cmd GetCardsByUserIdQuery) ([]*card.Card, bool, string, error) {
+func (h *GetCardByUserIdHandler) Handle(ctx context.Context, cmd GetCardsByUserIdQuery) ([]*card_client.Card, bool, string, error) {
 	return h.cardClient.GetCards(ctx, cmd.User.Id, cmd.Limit, cmd.After)
 }

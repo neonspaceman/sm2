@@ -13,3 +13,8 @@ type CardsResponse struct {
 type GetCardsQuery struct {
 	After string `form:"after" validate:"omitempty,uuid"`
 }
+
+type CreateCardRequest struct {
+	Question string `json:"question" validate:"required"`
+	Answer   string `json:"answer" validate:"required"`
+}

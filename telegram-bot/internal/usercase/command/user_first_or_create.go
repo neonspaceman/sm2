@@ -7,19 +7,19 @@ import (
 	"telegram-bot/internal/domain/repository"
 )
 
-type UserFirstOrCreateHandler struct {
+type FirstOrCreateUserHandler struct {
 	repository repository.UserRepositoryInterface
 }
 
-func NewUserFirstOrCreateHandler(
+func NewFirstOrCreateUserHandler(
 	repository repository.UserRepositoryInterface,
-) *UserFirstOrCreateHandler {
-	return &UserFirstOrCreateHandler{
+) *FirstOrCreateUserHandler {
+	return &FirstOrCreateUserHandler{
 		repository: repository,
 	}
 }
 
-func (h *UserFirstOrCreateHandler) Handle(ctx context.Context, data initdata.InitData) (*entity.User, error) {
+func (h *FirstOrCreateUserHandler) Handle(ctx context.Context, data initdata.InitData) (*entity.User, error) {
 	u, err := h.repository.FindByChatId(ctx, data.Chat.ID)
 
 	if err != nil {

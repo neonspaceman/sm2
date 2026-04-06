@@ -33,29 +33,20 @@ func NewCardClient(cfg *config.Config) *CardClient {
 	return &CardClient{grpc: grpcClient}
 }
 
-func (c *CardClient) Create(ctx context.Context, req card_client.CreateCardDto) error {
-	grpcRequest := &card.CreateRequest{
-		UserId:   req.UserId,
-		Question: req.Question,
-		Answer:   req.Answer,
+func (c *CardClient) Create(ctx context.Context, userId uuid.UUID, question, answer string) (*card_client.Card, error) {
+	req := &card.CreateRequest{
+		UserId:   userId.String(),
+		Question: question,
+		Answer:   answer,
 	}
 
-	switch req.FileType {
-	case card_client.FileTypePhoto:
-		grpcRequest.FileId = req.FileId
-		grpcRequest.FileType = card.FileType_PHOTO
-	case card_client.FileTypeDocument:
-		grpcRequest.FileId = req.FileId
-		grpcRequest.FileType = card.FileType_DOCUMENT
-	}
-
-	_, err := c.grpc.Create(ctx, grpcRequest)
+	response, err := c.grpc.Create(ctx, req)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return card_client.ToCard(response.Card), nil
 }
 
 func (c *CardClient) GetCards(ctx context.Context, userId uuid.UUID, limit uint64, after string) ([]*card_client.Card, bool, string, error) {
