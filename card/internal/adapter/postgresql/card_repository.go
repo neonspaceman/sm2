@@ -6,16 +6,20 @@ import (
 	"context"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CardRepository struct {
-	conn *pgxpool.Pool
+	Repository
 }
 
-func NewCardRepository(conn *pgxpool.Pool) *CardRepository {
+func NewCardRepository(pool *pgxpool.Pool, trm *trmpgx.CtxGetter) *CardRepository {
 	return &CardRepository{
-		conn: conn,
+		Repository{
+			pool: pool,
+			trm:  trm,
+		},
 	}
 }
 
@@ -45,7 +49,7 @@ func (r *CardRepository) Create(ctx context.Context, model *entity.Card) error {
 		PlaceholderFormat(sq.Dollar).
 		MustSql()
 
-	_, err := r.conn.Exec(ctx, sql, args...)
+	_, err := r.conn(ctx).Exec(ctx, sql, args...)
 
 	if err != nil {
 		return fmt.Errorf("execute sql \"%s\": %w", sql, err)

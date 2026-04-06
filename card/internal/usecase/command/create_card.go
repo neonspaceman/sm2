@@ -1,10 +1,11 @@
 package command
 
 import (
-	entityPkg "card/internal/domain/entity"
+	domain_entity "card/internal/domain/entity"
 	"card/internal/domain/repository"
 	"context"
 	"fmt"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
@@ -18,46 +19,63 @@ type CreateCardCmd struct {
 }
 
 type CardCreateHandler struct {
-	repository repository.CardRepositoryInterface
-	validate   *validator.Validate
+	cardRepository      repository.CardRepositoryInterface
+	cardStateRepository repository.CardStateRepositoryInterface
+	trManager           *manager.Manager
+	validate            *validator.Validate
 }
 
 func NewCreateCardHandler(
-	repository repository.CardRepositoryInterface,
+	cardRepository repository.CardRepositoryInterface,
+	cardStateRepository repository.CardStateRepositoryInterface,
+	trManager *manager.Manager,
 	validate *validator.Validate,
 ) *CardCreateHandler {
 	return &CardCreateHandler{
-		repository: repository,
-		validate:   validate,
+		cardRepository:      cardRepository,
+		cardStateRepository: cardStateRepository,
+		trManager:           trManager,
+		validate:            validate,
 	}
 }
 
-func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*entityPkg.Card, error) {
+func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*domain_entity.Card, error) {
 	err := h.validate.Struct(&cmd)
-
 	if err != nil {
 		return nil, err
 	}
 
 	userId, err := uuid.Parse(cmd.UserId)
-
 	if err != nil {
 		return nil, err
 	}
 
-	card, err := entityPkg.NewCard(
+	card, err := domain_entity.NewCard(
 		userId,
 		cmd.Answer,
 		cmd.Question,
-		entityPkg.FileType(cmd.FileType),
+		domain_entity.FileType(cmd.FileType),
 		cmd.FileId,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 
-	err = h.repository.Create(ctx, card)
+	cardState := domain_entity.NewCardState(card.Id)
+
+	err = h.trManager.Do(ctx, func(ctx context.Context) error {
+		err = h.cardRepository.Create(ctx, card)
+		if err != nil {
+			return err
+		}
+
+		err = h.cardStateRepository.Create(ctx, cardState)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return nil, fmt.Errorf("create new card: %w", err)

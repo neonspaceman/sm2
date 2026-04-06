@@ -12,6 +12,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	validator_pkg "github.com/go-playground/validator/v10"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -67,22 +69,28 @@ func run(cfg *config.Config) error {
 	}
 	defer log.Close()
 
-	conn, err := pgxpool.New(context.Background(), cfg.Database.DSN)
+	pool, err := pgxpool.New(context.Background(), cfg.Database.DSN)
 	if err != nil {
 		return err
 	}
-	err = conn.Ping(context.Background())
+	err = pool.Ping(context.Background())
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer pool.Close()
 
 	validator := validator_pkg.New(validator_pkg.WithRequiredStructEnabled())
+	trManager, err := manager.New(trmpgx.NewDefaultFactory(pool))
 
-	cardRepository := postgresql.NewCardRepository(conn)
+	if err != nil {
+		return err
+	}
 
-	createCardHandler := command.NewCreateCardHandler(cardRepository, validator)
-	getCardsByUserIdHandler := query.NewGetCardByUserIdHandler(conn, validator)
+	cardRepository := postgresql.NewCardRepository(pool, trmpgx.DefaultCtxGetter)
+	cardStateRepository := postgresql.NewCardStateRepository(pool, trmpgx.DefaultCtxGetter)
+
+	createCardHandler := command.NewCreateCardHandler(cardRepository, cardStateRepository, trManager, validator)
+	getCardsByUserIdHandler := query.NewGetCardByUserIdHandler(pool, validator)
 
 	api := api_pkg.NewCardImpl(api_pkg.CardImplProps{
 		CreateCardHandler:     createCardHandler,
