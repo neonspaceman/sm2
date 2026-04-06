@@ -81,11 +81,15 @@ func run(cfg *config.Config) error {
 	getCardsHandler := query.NewGetCardByUserIdHandler(cardClient)
 	userFirstOrCreateHandler := command.NewUserFirstOrCreateHandler(userRepository)
 
-	// TODO: remove
+	// TODO: remove this is for test now
 	botToken := "5768337691:AAH5YkoiEuPk8-FZa32hStHTqXiLPtAEhx8"
 
 	r := gin.Default()
-	r.Use(middleware.TelegramAuth(botToken), middleware.ErrorHandler(log), gin.Recovery())
+	r.Use(
+		middleware.TelegramAuth(botToken, userFirstOrCreateHandler),
+		middleware.ErrorHandler(log),
+		gin.Recovery(),
+	)
 
 	cardHandler := rest.NewCardHandler(userFirstOrCreateHandler, getCardsHandler, validator)
 	cardHandler.RegisterRoutes(r)

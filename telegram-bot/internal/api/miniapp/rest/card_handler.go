@@ -39,7 +39,7 @@ func (h *CardHandler) GetAllCards(ctx *gin.Context) {
 	var req GetCardsQuery
 	err := ctx.ShouldBindQuery(&req)
 	if err != nil {
-		ctx.Error(BadRequestErr)
+		ctx.Error(ErrBadRequest)
 		return
 	}
 
@@ -49,11 +49,7 @@ func (h *CardHandler) GetAllCards(ctx *gin.Context) {
 		return
 	}
 
-	user, err := h.userFirstOrCreateHandler.Handle(ctx, context.MustGetInitData(ctx))
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
+	user := context.MustGetUser(ctx)
 
 	cards, hasNext, endCursor, err := h.getCardByUserIdHandler.Handle(ctx, query.GetCardsByUserIdQuery{
 		User:  user,

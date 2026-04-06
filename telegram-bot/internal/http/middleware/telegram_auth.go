@@ -6,16 +6,17 @@ import (
 	"net/http"
 	"strings"
 	"telegram-bot/internal/http/context"
+	"telegram-bot/internal/usercase/command"
 )
 
 const authorizationKey = "tma"
 
-func TelegramAuth(botToken string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authString := c.GetHeader("Authorization")
+func TelegramAuth(botToken string, userFirstOrCreateHandler *command.UserFirstOrCreateHandler) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authString := ctx.GetHeader("Authorization")
 
 		if !strings.HasPrefix(authString, authorizationKey+" ") {
-			c.AbortWithStatus(http.StatusForbidden)
+			ctx.AbortWithStatus(http.StatusForbidden)
 			return
 		}
 
@@ -24,17 +25,25 @@ func TelegramAuth(botToken string) gin.HandlerFunc {
 		err := initdata.Validate(authString, botToken, 0)
 
 		if err != nil {
-			c.AbortWithStatus(http.StatusForbidden)
+			ctx.AbortWithStatus(http.StatusForbidden)
+			return
 		}
 
 		userData, err := initdata.Parse(authString)
 
 		if err != nil {
-			c.AbortWithStatus(http.StatusForbidden)
+			ctx.AbortWithStatus(http.StatusForbidden)
+			return
 		}
 
-		context.SetInitData(c, &userData)
+		user, err := userFirstOrCreateHandler.Handle(ctx, userData)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusForbidden)
+			return
+		}
 
-		c.Next()
+		context.SetUser(ctx, user)
+
+		ctx.Next()
 	}
 }

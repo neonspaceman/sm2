@@ -49,4 +49,4 @@ func (e *HttpError) Error() string {
 	return e.Message
 }
 
-var BadRequestErr = NewHttpError(http.StatusBadRequest, WithMessage("Bad request"))
+var ErrBadRequest = NewHttpError(http.StatusBadRequest, WithMessage("Bad request"))

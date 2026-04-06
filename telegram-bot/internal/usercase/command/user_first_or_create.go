@@ -19,7 +19,7 @@ func NewUserFirstOrCreateHandler(
 	}
 }
 
-func (h *UserFirstOrCreateHandler) Handle(ctx context.Context, data *initdata.InitData) (*entity.User, error) {
+func (h *UserFirstOrCreateHandler) Handle(ctx context.Context, data initdata.InitData) (*entity.User, error) {
 	u, err := h.repository.FindByChatId(ctx, data.Chat.ID)
 
 	if err != nil {
