@@ -1,4 +1,4 @@
-# SuperMemo 2 telegram bot (monorepo)
+# Remember it. Telegram miniapp (monorepo)
 
 Description: https://en.wikipedia.org/wiki/SuperMemo
 
