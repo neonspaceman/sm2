@@ -2,7 +2,7 @@ package postgresql
 
 import (
 	"card/internal/consts"
-	"card/internal/domain/entity"
+	card_domain "card/internal/domain/card"
 	"context"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -23,7 +23,7 @@ func NewCardRepository(pool *pgxpool.Pool, trm *trmpgx.CtxGetter) *CardRepositor
 	}
 }
 
-func (r *CardRepository) Create(ctx context.Context, model *entity.Card) error {
+func (r *CardRepository) Create(ctx context.Context, model *card_domain.Card) error {
 	sql, args := sq.
 		Insert(consts.CardTableName).
 		Columns(

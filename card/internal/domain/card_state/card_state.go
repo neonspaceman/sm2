@@ -1,4 +1,4 @@
-package entity
+package card_state
 
 import (
 	"github.com/google/uuid"
@@ -20,8 +20,8 @@ type CardState struct {
 	Easy                  float64       `db:"easy"`
 	Due                   time.Time     `db:"due"`
 	CurrentIntervalInDays int64         `db:"current_interval_in_days"`
-	CreatedAt             time.Time
-	UpdatedAt             time.Time
+	CreatedAt             time.Time     `db:"created_at"`
+	UpdatedAt             time.Time     `db:"updated_at"`
 }
 
 func NewCardState(id uuid.UUID) *CardState {

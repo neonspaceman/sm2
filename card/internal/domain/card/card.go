@@ -1,16 +1,8 @@
-package entity
+package card
 
 import (
 	"github.com/google/uuid"
 	"time"
-)
-
-type FileType string
-
-const (
-	FileTypeNone     FileType = "NONE"
-	FileTypePhoto    FileType = "PHOTO"
-	FileTypeDocument FileType = "DOCUMENT"
 )
 
 type Card struct {

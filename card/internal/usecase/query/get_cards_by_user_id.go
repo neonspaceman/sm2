@@ -2,7 +2,7 @@ package query
 
 import (
 	"card/internal/consts"
-	"card/internal/domain/entity"
+	domain_card "card/internal/domain/card"
 	"card/internal/query_builder"
 	"context"
 	"fmt"
@@ -33,7 +33,7 @@ func NewGetCardByUserIdHandler(
 	}
 }
 
-func (h *GetCardByUserIdHandler) Handle(ctx context.Context, cmd GetCardsByUserIdQuery) ([]*entity.Card, error) {
+func (h *GetCardByUserIdHandler) Handle(ctx context.Context, cmd GetCardsByUserIdQuery) ([]*domain_card.Card, error) {
 	err := h.validate.Struct(&cmd)
 
 	if err != nil {
@@ -56,7 +56,7 @@ func (h *GetCardByUserIdHandler) Handle(ctx context.Context, cmd GetCardsByUserI
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	cards, err := pgx.CollectRows(rows, pgx.RowToAddrOfStructByName[entity.Card])
+	cards, err := pgx.CollectRows(rows, pgx.RowToAddrOfStructByName[domain_card.Card])
 
 	if err != nil {
 		return nil, fmt.Errorf("collect one: %w", err)

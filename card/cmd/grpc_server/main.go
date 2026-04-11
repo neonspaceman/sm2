@@ -2,10 +2,10 @@ package main
 
 import (
 	"card/internal/adapter/postgresql"
-	api_pkg "card/internal/api/grpc"
+	grpc_api "card/internal/api/grpc"
 	"card/internal/config"
 	"card/internal/consts"
-	grpc_pkg "card/internal/grpc/interceptors"
+	"card/internal/grpc/interceptors"
 	"card/internal/usecase/command"
 	"card/internal/usecase/query"
 	"card/pkg/api/card"
@@ -92,7 +92,7 @@ func run(cfg *config.Config) error {
 	createCardHandler := command.NewCreateCardHandler(cardRepository, cardStateRepository, trManager, validator)
 	getCardsByUserIdHandler := query.NewGetCardByUserIdHandler(pool, validator)
 
-	api := api_pkg.NewCardImpl(api_pkg.CardImplProps{
+	api := grpc_api.NewCardImpl(grpc_api.CardImplProps{
 		CreateCardHandler:     createCardHandler,
 		GetCardsByUserIdQuery: getCardsByUserIdHandler,
 		Log:                   log,
@@ -115,7 +115,7 @@ func run(cfg *config.Config) error {
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_recovery.UnaryServerInterceptor(),
 			//InterceptorRequestId(),
-			grpc_logging.UnaryServerInterceptor(grpc_pkg.LoggerInterceptor(log), grpc_logging.WithLogOnEvents(grpc_logging.StartCall, grpc_logging.FinishCall)),
+			grpc_logging.UnaryServerInterceptor(interceptors.LoggerInterceptor(log), grpc_logging.WithLogOnEvents(grpc_logging.StartCall, grpc_logging.FinishCall)),
 		)),
 	)
 

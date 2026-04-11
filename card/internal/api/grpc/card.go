@@ -18,6 +18,7 @@ type CardImplProps struct {
 	Log                   *logger.Logger
 	CreateCardHandler     *command.CardCreateHandler
 	GetCardsByUserIdQuery *query.GetCardByUserIdHandler
+	ReviewCardHandler     *command.ReviewCardHandler
 }
 
 type CardImpl struct {
@@ -25,6 +26,7 @@ type CardImpl struct {
 	log                   *logger.Logger
 	cardCreateHandler     *command.CardCreateHandler
 	getCardsByUserIdQuery *query.GetCardByUserIdHandler
+	reviewCardHandler     *command.ReviewCardHandler
 }
 
 func NewCardImpl(props CardImplProps) *CardImpl {
@@ -32,11 +34,12 @@ func NewCardImpl(props CardImplProps) *CardImpl {
 		log:                   props.Log,
 		cardCreateHandler:     props.CreateCardHandler,
 		getCardsByUserIdQuery: props.GetCardsByUserIdQuery,
+		reviewCardHandler:     props.ReviewCardHandler,
 	}
 }
 
 // TODO: change to interceptor?
-func (c *CardImpl) handleError(ctx context.Context, err error) error {
+func (s *CardImpl) handleError(ctx context.Context, err error) error {
 	var validationErrors validator.ValidationErrors
 
 	if errors.As(err, &validationErrors) {
@@ -52,7 +55,7 @@ func (c *CardImpl) handleError(ctx context.Context, err error) error {
 		return grpcStatus.Err()
 	}
 
-	c.log.ErrorCtx(ctx, "internal error", zap.String("error", err.Error()))
+	s.log.ErrorCtx(ctx, "internal error", zap.String("error", err.Error()))
 
 	return status.Error(codes.Internal, err.Error())
 }

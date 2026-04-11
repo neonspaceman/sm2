@@ -3,14 +3,14 @@ package grpc
 import (
 	"card/internal/grpc/mappers"
 	"card/internal/usecase/query"
-	cardPkg "card/pkg/api/card"
+	card_api "card/pkg/api/card"
 	"context"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
-func (c *CardImpl) GetByUserId(ctx context.Context, req *cardPkg.GetByUserIdRequest) (*cardPkg.GetByUserIdResponse, error) {
-	c.log.InfoCtx(
+func (s *CardImpl) GetByUserId(ctx context.Context, req *card_api.GetByUserIdRequest) (*card_api.GetByUserIdResponse, error) {
+	s.log.InfoCtx(
 		ctx,
 		"Incoming get by user id request",
 		zap.String("user_id", req.UserId),
@@ -22,14 +22,14 @@ func (c *CardImpl) GetByUserId(ctx context.Context, req *cardPkg.GetByUserIdRequ
 		After:  req.After,
 	}
 
-	cards, err := c.getCardsByUserIdQuery.Handle(ctx, cmd)
+	cards, err := s.getCardsByUserIdQuery.Handle(ctx, cmd)
 
 	if err != nil {
-		return nil, c.handleError(ctx, err)
+		return nil, s.handleError(ctx, err)
 	}
 
 	var encCursor uuid.UUID
-	res := make([]*cardPkg.Card, 0, req.Limit)
+	res := make([]*card_api.Card, 0, req.Limit)
 	limit := min(uint64(len(cards)), req.Limit)
 
 	for _, card := range cards[:limit] {
@@ -37,7 +37,7 @@ func (c *CardImpl) GetByUserId(ctx context.Context, req *cardPkg.GetByUserIdRequ
 		encCursor = card.Id
 	}
 
-	return &cardPkg.GetByUserIdResponse{
+	return &card_api.GetByUserIdResponse{
 		Cards:     res,
 		HasNext:   uint64(len(cards)) > req.Limit,
 		EndCursor: encCursor.String(),

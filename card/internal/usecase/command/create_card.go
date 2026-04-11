@@ -1,8 +1,8 @@
 package command
 
 import (
-	domain_entity "card/internal/domain/entity"
-	"card/internal/domain/repository"
+	domain_card "card/internal/domain/card"
+	domain_card_state "card/internal/domain/card_state"
 	"context"
 	"fmt"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
@@ -19,15 +19,15 @@ type CreateCardCmd struct {
 }
 
 type CardCreateHandler struct {
-	cardRepository      repository.CardRepositoryInterface
-	cardStateRepository repository.CardStateRepositoryInterface
+	cardRepository      domain_card.CardRepositoryInterface
+	cardStateRepository domain_card_state.CardStateRepositoryInterface
 	trManager           *manager.Manager
 	validate            *validator.Validate
 }
 
 func NewCreateCardHandler(
-	cardRepository repository.CardRepositoryInterface,
-	cardStateRepository repository.CardStateRepositoryInterface,
+	cardRepository domain_card.CardRepositoryInterface,
+	cardStateRepository domain_card_state.CardStateRepositoryInterface,
 	trManager *manager.Manager,
 	validate *validator.Validate,
 ) *CardCreateHandler {
@@ -39,7 +39,7 @@ func NewCreateCardHandler(
 	}
 }
 
-func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*domain_entity.Card, error) {
+func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*domain_card.Card, error) {
 	err := h.validate.Struct(&cmd)
 	if err != nil {
 		return nil, err
@@ -50,18 +50,18 @@ func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*dom
 		return nil, err
 	}
 
-	card, err := domain_entity.NewCard(
+	card, err := domain_card.NewCard(
 		userId,
 		cmd.Answer,
 		cmd.Question,
-		domain_entity.FileType(cmd.FileType),
+		domain_card.FileType(cmd.FileType),
 		cmd.FileId,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	cardState := domain_entity.NewCardState(card.Id)
+	cardState := domain_card_state.NewCardState(card.Id)
 
 	err = h.trManager.Do(ctx, func(ctx context.Context) error {
 		err = h.cardRepository.Create(ctx, card)
