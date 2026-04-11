@@ -1,10 +1,13 @@
 package grpc
 
 import (
+	domain_card "card/internal/domain/card"
 	"card/internal/grpc/mappers"
 	"card/internal/usecase/command"
 	card_api "card/pkg/api/card"
 	"context"
+	"fmt"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -18,19 +21,24 @@ func (s *CardImpl) Create(ctx context.Context, req *card_api.CreateRequest) (*ca
 		zap.String("file_id", req.FileId),
 	)
 
+	userId, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
 	cmd := command.CreateCardCmd{
-		UserId:   req.UserId,
+		UserId:   userId,
 		Question: req.Question,
 		Answer:   req.Answer,
-		FileType: req.FileType.String(),
+		FileType: domain_card.FileTypeNone,
 		FileId:   req.FileId,
 	}
 
 	card, err := s.cardCreateHandler.Handle(ctx, cmd)
 
 	if err != nil {
-		return nil, s.handleError(ctx, err)
+		return nil, fmt.Errorf("create card: %w", err)
 	}
 
-	return &card_api.CreateResponse{Card: mappers.ToCard(card)}, nil
+	return &card_api.CreateResponse{Card: mappers.FromCard(card)}, nil
 }

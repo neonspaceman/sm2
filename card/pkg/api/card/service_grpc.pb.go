@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type CardServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	GetByUserId(ctx context.Context, in *GetByUserIdRequest, opts ...grpc.CallOption) (*GetByUserIdResponse, error)
+	Review(ctx context.Context, in *ReviewCardRequest, opts ...grpc.CallOption) (*ReviewCardResponse, error)
 }
 
 type cardServiceClient struct {
@@ -32,7 +33,7 @@ func NewCardServiceClient(cc grpc.ClientConnInterface) CardServiceClient {
 
 func (c *cardServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
 	out := new(CreateResponse)
-	err := c.cc.Invoke(ctx, "/sm2.api.card.CardService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/remember_it.api.card.CardService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,16 @@ func (c *cardServiceClient) Create(ctx context.Context, in *CreateRequest, opts 
 
 func (c *cardServiceClient) GetByUserId(ctx context.Context, in *GetByUserIdRequest, opts ...grpc.CallOption) (*GetByUserIdResponse, error) {
 	out := new(GetByUserIdResponse)
-	err := c.cc.Invoke(ctx, "/sm2.api.card.CardService/GetByUserId", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/remember_it.api.card.CardService/GetByUserId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cardServiceClient) Review(ctx context.Context, in *ReviewCardRequest, opts ...grpc.CallOption) (*ReviewCardResponse, error) {
+	out := new(ReviewCardResponse)
+	err := c.cc.Invoke(ctx, "/remember_it.api.card.CardService/Review", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +64,7 @@ func (c *cardServiceClient) GetByUserId(ctx context.Context, in *GetByUserIdRequ
 type CardServiceServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	GetByUserId(context.Context, *GetByUserIdRequest) (*GetByUserIdResponse, error)
+	Review(context.Context, *ReviewCardRequest) (*ReviewCardResponse, error)
 	mustEmbedUnimplementedCardServiceServer()
 }
 
@@ -66,6 +77,9 @@ func (UnimplementedCardServiceServer) Create(context.Context, *CreateRequest) (*
 }
 func (UnimplementedCardServiceServer) GetByUserId(context.Context, *GetByUserIdRequest) (*GetByUserIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByUserId not implemented")
+}
+func (UnimplementedCardServiceServer) Review(context.Context, *ReviewCardRequest) (*ReviewCardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Review not implemented")
 }
 func (UnimplementedCardServiceServer) mustEmbedUnimplementedCardServiceServer() {}
 
@@ -90,7 +104,7 @@ func _CardService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sm2.api.card.CardService/Create",
+		FullMethod: "/remember_it.api.card.CardService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CardServiceServer).Create(ctx, req.(*CreateRequest))
@@ -108,10 +122,28 @@ func _CardService_GetByUserId_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sm2.api.card.CardService/GetByUserId",
+		FullMethod: "/remember_it.api.card.CardService/GetByUserId",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CardServiceServer).GetByUserId(ctx, req.(*GetByUserIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CardService_Review_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReviewCardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CardServiceServer).Review(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remember_it.api.card.CardService/Review",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CardServiceServer).Review(ctx, req.(*ReviewCardRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -120,7 +152,7 @@ func _CardService_GetByUserId_Handler(srv interface{}, ctx context.Context, dec 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CardService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sm2.api.card.CardService",
+	ServiceName: "remember_it.api.card.CardService",
 	HandlerType: (*CardServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -130,6 +162,10 @@ var CardService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetByUserId",
 			Handler:    _CardService_GetByUserId_Handler,
+		},
+		{
+			MethodName: "Review",
+			Handler:    _CardService_Review_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -28,13 +28,16 @@ func NewCardStateRepository(pool *pgxpool.Pool, trm *trmpgx.CtxGetter) *CardStat
 }
 
 func (r *CardStateRepository) GetById(ctx context.Context, id uuid.UUID) (*card_state_domain.CardState, error) {
-	sql, args := query_builder.CardStateQueryBuilder().
+	sql, args, err := query_builder.CardStateQueryBuilder().
 		Where(sq.Eq{consts.CardStateIdColumn: id}).
-		MustSql()
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("build query: %w", err)
+	}
 
 	rows, err := r.conn(ctx).Query(ctx, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("query_builder: %w", err)
+		return nil, fmt.Errorf("select card '%s': %w", id.String(), err)
 	}
 
 	model, err := pgx.CollectOneRow(rows, pgx.RowToAddrOfStructByName[card_state_domain.CardState])
@@ -44,14 +47,14 @@ func (r *CardStateRepository) GetById(ctx context.Context, id uuid.UUID) (*card_
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("collect one: %w", err)
+		return nil, fmt.Errorf("collect card '%s': %w", id.String(), err)
 	}
 
 	return model, nil
 }
 
 func (r *CardStateRepository) Create(ctx context.Context, model *card_state_domain.CardState) error {
-	sql, args := sq.
+	sql, args, err := sq.
 		Insert(consts.CardStateTableName).
 		Columns(
 			consts.CardStateIdColumn,
@@ -74,12 +77,39 @@ func (r *CardStateRepository) Create(ctx context.Context, model *card_state_doma
 			model.UpdatedAt,
 		).
 		PlaceholderFormat(sq.Dollar).
-		MustSql()
-
-	_, err := r.conn(ctx).Exec(ctx, sql, args...)
-
+		ToSql()
 	if err != nil {
-		return fmt.Errorf("execute sql \"%s\": %w", sql, err)
+		return fmt.Errorf("build query: %w", err)
+	}
+
+	_, err = r.conn(ctx).Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("insert card: %w", err)
+	}
+
+	return nil
+}
+
+func (r *CardStateRepository) Save(ctx context.Context, model *card_state_domain.CardState) error {
+	model.BeforeUpdate()
+
+	sql, args, err := sq.
+		Update(consts.CardStateTableName).
+		Set(consts.CardStateStateColumn, model.State).
+		Set(consts.CardStateStepColumn, model.Step).
+		Set(consts.CardStateEasyColumn, model.Easy).
+		Set(consts.CardStateDueColumn, model.Due).
+		Set(consts.CardStateCurrentIntervalInDaysColumn, model.CurrentIntervalInDays).
+		Set(consts.CardStateUpdatedAtColumn, model.UpdatedAt).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("build query: %w", err)
+	}
+
+	_, err = r.conn(ctx).Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("update card: %w", err)
 	}
 
 	return nil

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package sm2.api.card;
+package remember_it.api.card;
 
 import "card/messages.proto";
 
@@ -9,4 +9,5 @@ option go_package = "card/pkg/api/card;card";
 service CardService {
   rpc Create(CreateRequest) returns (CreateResponse);
   rpc GetByUserId(GetByUserIdRequest) returns (GetByUserIdResponse);
+  rpc Review (ReviewCardRequest) returns (ReviewCardResponse);
 }

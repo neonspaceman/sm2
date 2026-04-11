@@ -11,10 +11,10 @@ import (
 )
 
 type CreateCardCmd struct {
-	UserId   string `validate:"required,uuid"`
-	Question string `validate:"required"`
-	Answer   string `validate:"required"`
-	FileType string `validate:"required,oneof=NONE PHOTO DOCUMENT"`
+	UserId   uuid.UUID            `validate:"required"`
+	Question string               `validate:"required"`
+	Answer   string               `validate:"required"`
+	FileType domain_card.FileType `validate:"required"`
 	FileId   string
 }
 
@@ -45,18 +45,7 @@ func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*dom
 		return nil, err
 	}
 
-	userId, err := uuid.Parse(cmd.UserId)
-	if err != nil {
-		return nil, err
-	}
-
-	card, err := domain_card.NewCard(
-		userId,
-		cmd.Answer,
-		cmd.Question,
-		domain_card.FileType(cmd.FileType),
-		cmd.FileId,
-	)
+	card, err := domain_card.NewCard(cmd.UserId, cmd.Answer, cmd.Question, cmd.FileType, cmd.FileId)
 	if err != nil {
 		return nil, err
 	}

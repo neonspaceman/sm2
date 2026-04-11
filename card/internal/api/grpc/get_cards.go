@@ -5,6 +5,7 @@ import (
 	"card/internal/usecase/query"
 	card_api "card/pkg/api/card"
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -16,16 +17,30 @@ func (s *CardImpl) GetByUserId(ctx context.Context, req *card_api.GetByUserIdReq
 		zap.String("user_id", req.UserId),
 	)
 
+	userId, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	afterCursor := uuid.Nil
+
+	if req.After != "" {
+		afterCursor, err = uuid.Parse(req.After)
+		if err != nil {
+			return nil, fmt.Errorf("parse cursor: %w", err)
+		}
+	}
+
 	cmd := query.GetCardsByUserIdQuery{
-		UserId: req.UserId,
+		UserId: userId,
 		Limit:  req.Limit + 1,
-		After:  req.After,
+		After:  afterCursor,
 	}
 
 	cards, err := s.getCardsByUserIdQuery.Handle(ctx, cmd)
 
 	if err != nil {
-		return nil, s.handleError(ctx, err)
+		return nil, fmt.Errorf("get cards: %w", err)
 	}
 
 	var encCursor uuid.UUID
@@ -33,7 +48,7 @@ func (s *CardImpl) GetByUserId(ctx context.Context, req *card_api.GetByUserIdReq
 	limit := min(uint64(len(cards)), req.Limit)
 
 	for _, card := range cards[:limit] {
-		res = append(res, mappers.ToCard(card))
+		res = append(res, mappers.FromCard(card))
 		encCursor = card.Id
 	}
 

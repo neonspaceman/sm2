@@ -1,0 +1,91 @@
+package command
+
+import (
+	card_domain "card/internal/domain/card"
+	card_state_domain "card/internal/domain/card_state"
+	review_domain "card/internal/domain/review"
+	"card/internal/service/review"
+	"context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
+	"time"
+)
+
+type ReviewCardCmd struct {
+	UserId     uuid.UUID `validate:"required"`
+	CardId     uuid.UUID `validate:"required"`
+	ReviewedAt time.Time `validate:"required"`
+	Rating     review_domain.RatingType
+}
+
+type ReviewCardHandler struct {
+	cardRepository      card_domain.CardRepositoryInterface
+	cardStateRepository card_state_domain.CardStateRepositoryInterface
+	reviewLogRepository review_domain.ReviewLogRepositoryInterface
+	scheduler           review.SchedulerInterface
+	validate            *validator.Validate
+	trManager           *manager.Manager
+}
+
+func NewReviewCardHandler(
+	cardRepository card_domain.CardRepositoryInterface,
+	cardStateRepository card_state_domain.CardStateRepositoryInterface,
+	reviewLogRepository review_domain.ReviewLogRepositoryInterface,
+	scheduler review.SchedulerInterface,
+	validate *validator.Validate,
+	trManager *manager.Manager,
+) *ReviewCardHandler {
+	return &ReviewCardHandler{
+		cardRepository:      cardRepository,
+		cardStateRepository: cardStateRepository,
+		reviewLogRepository: reviewLogRepository,
+		scheduler:           scheduler,
+		validate:            validate,
+		trManager:           trManager,
+	}
+}
+
+func (h *ReviewCardHandler) Handle(ctx context.Context, cmd ReviewCardCmd) (*review_domain.ReviewLog, error) {
+	err := h.validate.Struct(&cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	card, err := h.cardRepository.GetById(ctx, cmd.CardId)
+	if err != nil {
+		return nil, err
+	}
+
+	if card.UserId != cmd.UserId {
+		return nil, card_domain.ErrCardNotFound
+	}
+
+	cardState, err := h.cardStateRepository.GetById(ctx, cmd.CardId)
+	if err != nil {
+		return nil, err
+	}
+
+	reviewLog, err := h.scheduler.ReviewCard(cardState, cmd.Rating, cmd.ReviewedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.trManager.Do(ctx, func(ctx context.Context) error {
+		if err := h.cardStateRepository.Save(ctx, cardState); err != nil {
+			return err
+		}
+
+		if err := h.reviewLogRepository.Create(ctx, reviewLog); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reviewLog, nil
+}

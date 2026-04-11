@@ -6,6 +6,7 @@ import (
 	"card/internal/config"
 	"card/internal/consts"
 	"card/internal/grpc/interceptors"
+	review_service "card/internal/service/review"
 	"card/internal/usecase/command"
 	"card/internal/usecase/query"
 	"card/pkg/api/card"
@@ -81,20 +82,24 @@ func run(cfg *config.Config) error {
 
 	validator := validator_pkg.New(validator_pkg.WithRequiredStructEnabled())
 	trManager, err := manager.New(trmpgx.NewDefaultFactory(pool))
+	trGetter := trmpgx.DefaultCtxGetter
 
 	if err != nil {
 		return err
 	}
 
-	cardRepository := postgresql.NewCardRepository(pool, trmpgx.DefaultCtxGetter)
-	cardStateRepository := postgresql.NewCardStateRepository(pool, trmpgx.DefaultCtxGetter)
+	cardRepository := postgresql.NewCardRepository(pool, trGetter)
+	cardStateRepository := postgresql.NewCardStateRepository(pool, trGetter)
+	reviewLogRepository := postgresql.NewReviewLogRepository(pool, trGetter)
 
 	createCardHandler := command.NewCreateCardHandler(cardRepository, cardStateRepository, trManager, validator)
 	getCardsByUserIdHandler := query.NewGetCardByUserIdHandler(pool, validator)
+	reviewCardHandler := command.NewReviewCardHandler(cardRepository, cardStateRepository, reviewLogRepository, review_service.NewScheduler(), validator, trManager)
 
 	api := grpc_api.NewCardImpl(grpc_api.CardImplProps{
 		CreateCardHandler:     createCardHandler,
 		GetCardsByUserIdQuery: getCardsByUserIdHandler,
+		ReviewCardHandler:     reviewCardHandler,
 		Log:                   log,
 	})
 

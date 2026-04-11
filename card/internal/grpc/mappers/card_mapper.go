@@ -5,7 +5,7 @@ import (
 	api_card "card/pkg/api/card"
 )
 
-func ToCard(e *domain_card.Card) *api_card.Card {
+func FromCard(e *domain_card.Card) *api_card.Card {
 	return &api_card.Card{
 		Id:       e.Id.String(),
 		Question: e.Question,

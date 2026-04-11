@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-package sm2.api.card;
+import "google/protobuf/timestamp.proto";
+
+package remember_it.api.card;
 
 option go_package = "card/pkg/api/card;card";
 
@@ -10,12 +12,25 @@ enum FileType {
   DOCUMENT = 2;
 }
 
+enum Rating {
+  AGAIN = 0;
+  HARD = 1;
+  GOOD = 2;
+  EASY = 3;
+}
+
 message Card {
   string id = 1;
   string question = 2;
   string answer = 3;
   FileType file_type = 4;
   string file_id = 5;
+}
+
+message ReviewLog {
+  string id = 1;
+  string card_id = 2;
+  Rating rating = 3;
 }
 
 message CreateRequest {
@@ -40,4 +55,15 @@ message GetByUserIdResponse {
   repeated Card cards = 1;
   string end_cursor = 2;
   bool has_next = 3;
+}
+
+message ReviewCardRequest {
+  string user_id = 1;
+  string card_id = 2;
+  google.protobuf.Timestamp review_at = 3;
+  Rating rating = 4;
+}
+
+message ReviewCardResponse {
+  ReviewLog review_log = 1;
 }

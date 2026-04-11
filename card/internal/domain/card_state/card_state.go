@@ -66,7 +66,7 @@ func (s *CardState) SetCurrentIntervalInDays(currentIntervalInDays int64) *CardS
 	return s
 }
 
-func (s *CardState) SetUpdatedAtNow() *CardState {
+func (s *CardState) BeforeUpdate() *CardState {
 	s.UpdatedAt = time.Now()
 
 	return s

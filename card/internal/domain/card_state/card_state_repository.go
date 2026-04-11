@@ -6,6 +6,7 @@ import (
 )
 
 type CardStateRepositoryInterface interface {
-	Create(ctx context.Context, model *CardState) error
 	GetById(ctx context.Context, id uuid.UUID) (*CardState, error)
+	Create(ctx context.Context, model *CardState) error
+	Save(ctx context.Context, model *CardState) error
 }

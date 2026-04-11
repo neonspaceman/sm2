@@ -8,14 +8,15 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type GetCardsByUserIdQuery struct {
-	UserId string `validate:"required,uuid"`
-	Limit  uint64 `validate:"required"`
-	After  string `validate:"omitempty,uuid"`
+	UserId uuid.UUID `validate:"required"`
+	Limit  uint64    `validate:"required"`
+	After  uuid.UUID `validate:"omitempty"`
 }
 
 type GetCardByUserIdHandler struct {
@@ -45,7 +46,7 @@ func (h *GetCardByUserIdHandler) Handle(ctx context.Context, cmd GetCardsByUserI
 		OrderBy(fmt.Sprintf("%s DESC", consts.CardIdColumn)).
 		Limit(cmd.Limit)
 
-	if cmd.After != "" {
+	if cmd.After != uuid.Nil {
 		b = b.Where(sq.Lt{consts.CardIdColumn: cmd.After})
 	}
 
