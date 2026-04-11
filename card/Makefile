@@ -1,8 +1,8 @@
 .DEFAULT_GOAL := help
 .EXPORT_ALL_VARIABLES: ; # send all vars to shell
 
-ENV_FILE=.env
-include $(ENV_FILE)
+include ./.env
+MIGRATIONS_FOLDER=./migrations
 
 .PHONY: help
 help: ## Show commands descriptions
@@ -10,47 +10,27 @@ help: ## Show commands descriptions
 
 .PHONY: database-create
 database-create: ## Create database
-	cd ../dev \
-		&& PGPASSWORD=$(POSTGRES_PASSWORD) docker exec $$(docker compose ps -q postgresql) psql -U $(POSTGRES_USER) -tc "SELECT 1 FROM pg_database WHERE datname='$(POSTGRES_DATABASE)'" | grep -q 1 \
-		|| PGPASSWORD=$(POSTGRES_PASSWORD) docker exec $$(docker compose ps -q postgresql) psql -U $(POSTGRES_USER) -c "CREATE DATABASE $(POSTGRES_DATABASE)"
+	PGPASSWORD=$(POSTGRES_PASSWORD) docker compose run --rm postgresql psql -h postgresql -U $(POSTGRES_USER) -tc "SELECT 1 FROM pg_database WHERE datname='$(POSTGRES_DATABASE)'" | grep -q 1 \
+		|| PGPASSWORD=$(POSTGRES_PASSWORD) docker compose run --rm postgresql -h postgresql psql -U $(POSTGRES_USER) -c "CREATE DATABASE $(POSTGRES_DATABASE)"
 
 .PHONY: migrate-up
 migrate-up: ## Execute migrations
-	docker run \
-		--rm \
-		--volume ./:/app \
-		--network $(DOCKER_NETWORK_NAME) \
-		$$(docker compose images -q card) \
-		/go/bin/goose \
-			-dir $(MIGRATIONS) postgres "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DATABASE}?sslmode=disable" up
+	docker compose run --rm --volume ./:/app card \
+		/go/bin/goose -dir $(MIGRATIONS_FOLDER) postgres "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DATABASE}?sslmode=disable" up
 
 .PHONY: migrate-down
 migrate-down: ## Rollback migration
-	docker run \
-		--rm \
-		--volume ./:/app \
-		--network $(DOCKER_NETWORK_NAME) \
-		$$(docker compose images -q card) \
-		/go/bin/goose \
- 			-dir $(MIGRATIONS) postgres "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DATABASE}?sslmode=disable" down
+	docker compose run --rm card \
+		/go/bin/goose -dir $(MIGRATIONS_FOLDER) postgres "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DATABASE}?sslmode=disable" down
 
 .PHONY: migrate-create
 migrate-create: ## Create new migration. Example: make migrate-create name=<NAME>
-	docker run \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume ./:/app \
-		$$(docker compose images -q card) \
-		/go/bin/goose \
-	  		-dir $(MIGRATIONS) create $(name) sql
+	docker compose run --rm --user $$(id -u):$$(id -g) --volume ./:/app card \
+		/go/bin/goose -dir $(MIGRATIONS_FOLDER) create $(name) sql
 
 .PHONY: proto-generate
 proto-generate: ## Generate all proto files
-	docker run \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		--volume ./:/app \
-		$$(docker compose images -q card) \
+	docker compose run --rm --user $$(id -u):$$(id -g) --volume ./:/app card \
 		protoc \
 			--proto_path=proto \
 			--plugin=protoc-gen-go=/go/bin/protoc-gen-go \

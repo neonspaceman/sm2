@@ -1,9 +1,7 @@
 .DEFAULT_GOAL := help
 .EXPORT_ALL_VARIABLES: ; # send all vars to shell
 
-#CURRENT_USER := $(shell id -u)
-ENV_FILE=$(PWD)/.env
-include $(ENV_FILE)
+include infrastructure/.env
 
 .PHONY: help
 help: ## Show commands descriptions
@@ -11,17 +9,17 @@ help: ## Show commands descriptions
 
 .PHONY: build
 build: ## Build docker image
-	docker compose build
+	docker compose --profile dev build
 
 .PHONY: up
 up: ## Run go app
-	docker compose up --force-recreate
+	docker compose --profile dev up
 
 .PHONY: down
 down: ## Down all infrastructure containers
-	docker compose down
+	docker compose --profile dev down
 
-# DEV infrastructure enviroment
+# DEV infrastructure
 
 .PHONY: infrastructure-create-network
 infrastructure-create-network: ## Create network
@@ -38,9 +36,8 @@ infrastructure-create-network: ## Create network
 
 .PHONY: infrastructure-up
 infrastructure-up: ## Up all infrastructure containers
-	make infrastructure-create-network && \
-	docker compose -f ./infrastructure/docker-compose.yml up
+	make infrastructure-create-network && docker compose --profile infrastructure up
 
 .PHONY: infrastructure-down
 infrastructure-down: ## Down all infrastructure containers
-	docker compose -f ./infrastructure/docker-compose.yml down
+	docker compose --profile infrastructure down

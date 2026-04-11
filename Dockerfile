@@ -9,11 +9,3 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1 && \
     go install github.com/air-verse/air@v1.63.0
 
 WORKDIR /app
-
-COPY go.work go.work.sum ./
-COPY card/go.mod card/go.sum ./card/
-COPY platform/go.mod platform/go.sum ./platform/
-COPY telegram-bot/go.mod telegram-bot/go.sum ./telegram-bot/
-
-RUN cd /app/card && go mod download && \
-  cd /app/telegram-bot && go mod download
