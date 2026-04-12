@@ -3,11 +3,11 @@ package query
 import (
 	"context"
 	card_client "telegram-bot/internal/client/card"
-	"telegram-bot/internal/domain/entity"
+	"telegram-bot/internal/domain/user"
 )
 
 type GetCardsByUserIdQuery struct {
-	User  *entity.User
+	User  *user.User
 	Limit uint64
 	After string
 }

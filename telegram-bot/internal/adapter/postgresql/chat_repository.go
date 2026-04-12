@@ -7,7 +7,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"telegram-bot/internal/domain/entity"
+	user_domain "telegram-bot/internal/domain/user"
 )
 
 const (
@@ -38,7 +38,7 @@ var selectUser = sq.
 	From(userTableName).
 	PlaceholderFormat(sq.Dollar)
 
-func (r *UserRepository) FindByChatId(ctx context.Context, chatId int64) (*entity.User, error) {
+func (r *UserRepository) FindByChatId(ctx context.Context, chatId int64) (*user_domain.User, error) {
 	sql, args, err := selectUser.
 		Where(sq.Eq{userChatIdColumn: chatId}).
 		ToSql()
@@ -51,11 +51,10 @@ func (r *UserRepository) FindByChatId(ctx context.Context, chatId int64) (*entit
 		return nil, fmt.Errorf("query_builder: %w", err)
 	}
 
-	model, err := pgx.CollectOneRow(rows, pgx.RowToAddrOfStructByName[entity.User])
+	model, err := pgx.CollectOneRow(rows, pgx.RowToAddrOfStructByName[user_domain.User])
 
-	// @todo: add errnotfound
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
+		return nil, user_domain.ErrUserNotFound
 	}
 
 	if err != nil {
@@ -65,7 +64,7 @@ func (r *UserRepository) FindByChatId(ctx context.Context, chatId int64) (*entit
 	return model, nil
 }
 
-func (r *UserRepository) Create(ctx context.Context, model *entity.User) error {
+func (r *UserRepository) Create(ctx context.Context, model *user_domain.User) error {
 	sql, args, err := sq.
 		Insert(userTableName).
 		Columns(

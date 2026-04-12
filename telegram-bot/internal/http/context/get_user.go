@@ -3,7 +3,7 @@ package context
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"telegram-bot/internal/domain/entity"
+	"telegram-bot/internal/domain/user"
 )
 
 type UserKey = string
@@ -12,13 +12,13 @@ const key UserKey = "user_key"
 
 var ErrUnableToGetUser = errors.New("unable to get user from context")
 
-func SetUser(c *gin.Context, user *entity.User) {
+func SetUser(c *gin.Context, user *user.User) {
 	c.Set(key, user)
 }
 
-func GetUser(c *gin.Context) (*entity.User, error) {
+func GetUser(c *gin.Context) (*user.User, error) {
 	if val, ok := c.Get(key); ok {
-		if user, ok := val.(*entity.User); ok {
+		if user, ok := val.(*user.User); ok {
 			return user, nil
 		}
 	}

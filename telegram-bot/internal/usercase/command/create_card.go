@@ -3,11 +3,11 @@ package command
 import (
 	"context"
 	card_client "telegram-bot/internal/client/card"
-	"telegram-bot/internal/domain/entity"
+	"telegram-bot/internal/domain/user"
 )
 
 type CreateCardCmd struct {
-	User     *entity.User
+	User     *user.User
 	Answer   string
 	Question string
 }

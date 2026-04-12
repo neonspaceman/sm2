@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/google/uuid"
 	card_client "telegram-bot/internal/client/card"
-	"telegram-bot/internal/domain/entity"
+	"telegram-bot/internal/domain/user"
 )
 
 type ReviewCardCmd struct {
-	User   *entity.User
+	User   *user.User
 	CardId uuid.UUID
 	Rating string
 }
