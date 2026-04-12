@@ -47,27 +47,25 @@ func (h *CardCreateHandler) Handle(ctx context.Context, cmd CreateCardCmd) (*dom
 
 	card, err := domain_card.NewCard(cmd.UserId, cmd.Answer, cmd.Question, cmd.FileType, cmd.FileId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("new card: %w", err)
 	}
 
 	cardState := domain_card_state.NewCardState(card.Id)
 
 	err = h.trManager.Do(ctx, func(ctx context.Context) error {
-		err = h.cardRepository.Create(ctx, card)
-		if err != nil {
-			return err
+		if err := h.cardRepository.Create(ctx, card); err != nil {
+			return fmt.Errorf("create card: %w", err)
 		}
 
-		err = h.cardStateRepository.Create(ctx, cardState)
-		if err != nil {
-			return err
+		if err := h.cardStateRepository.Create(ctx, cardState); err != nil {
+			return fmt.Errorf("create card state: %w", err)
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("create new card: %w", err)
+		return nil, err
 	}
 
 	return card, nil

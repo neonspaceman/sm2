@@ -43,7 +43,7 @@ func (r *CardRepository) GetById(ctx context.Context, id uuid.UUID) (*card_domai
 	model, err := pgx.CollectOneRow(rows, pgx.RowToAddrOfStructByName[card_domain.Card])
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, card_domain.ErrCardNotFound
+		return nil, card_domain.NewCardNotFoundError(id)
 	}
 
 	if err != nil {

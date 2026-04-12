@@ -6,6 +6,7 @@ import (
 	review_domain "card/internal/domain/review"
 	"card/internal/service/review"
 	"context"
+	"fmt"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -54,30 +55,34 @@ func (h *ReviewCardHandler) Handle(ctx context.Context, cmd ReviewCardCmd) (*rev
 
 	card, err := h.cardRepository.GetById(ctx, cmd.CardId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get card '%s': %w", cmd.CardId, err)
 	}
 
 	if card.UserId != cmd.UserId {
-		return nil, card_domain.ErrCardNotFound
+		return nil, card_domain.NewCardNotFoundError(cmd.CardId)
 	}
 
 	cardState, err := h.cardStateRepository.GetById(ctx, cmd.CardId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get card state '%s': %w", cmd.CardId, err)
+	}
+
+	if !cmd.ReviewedAt.After(cardState.Due) {
+		return nil, review_domain.NewReviewPeriodNotStartError(cmd.ReviewedAt, cardState.Due)
 	}
 
 	reviewLog, err := h.scheduler.ReviewCard(cardState, cmd.Rating, cmd.ReviewedAt)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("review card '%s': %w", cmd.CardId, err)
 	}
 
 	err = h.trManager.Do(ctx, func(ctx context.Context) error {
 		if err := h.cardStateRepository.Save(ctx, cardState); err != nil {
-			return err
+			return fmt.Errorf("save card state '%s': %w", cmd.CardId, err)
 		}
 
 		if err := h.reviewLogRepository.Create(ctx, reviewLog); err != nil {
-			return err
+			return fmt.Errorf("create review log '%s': %w", cmd.CardId, err)
 		}
 
 		return nil

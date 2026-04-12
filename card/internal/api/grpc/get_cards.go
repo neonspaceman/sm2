@@ -40,7 +40,7 @@ func (s *CardImpl) GetByUserId(ctx context.Context, req *card_api.GetByUserIdReq
 	cards, err := s.getCardsByUserIdQuery.Handle(ctx, cmd)
 
 	if err != nil {
-		return nil, fmt.Errorf("get cards: %w", err)
+		return nil, fmt.Errorf("get cards query: %w", err)
 	}
 
 	var encCursor uuid.UUID

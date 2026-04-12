@@ -1,4 +1,4 @@
-FROM golang:1.25 AS development
+FROM golang:1.26 AS development
 
 RUN apt-get update && apt-get install -y protobuf-compiler \
     && rm -rf /var/lib/apt/lists/*

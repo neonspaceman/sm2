@@ -1,10 +1,13 @@
 package grpc
 
 import (
+	card_domain "card/internal/domain/card"
+	review_domain "card/internal/domain/review"
 	"card/internal/grpc/mappers"
 	"card/internal/usecase/command"
 	card_api "card/pkg/api/card"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -42,6 +45,13 @@ func (s *CardImpl) Review(ctx context.Context, req *card_api.ReviewCardRequest) 
 		Rating:     rating,
 	})
 	if err != nil {
+		if v, ok := errors.AsType[*card_domain.CardNotFoundError](err); ok {
+			return nil, NewErrCardNotFound(v.CardId)
+		}
+		if v, ok := errors.AsType[*review_domain.ReviewPeriodNotStartError](err); ok {
+			return nil, NewErrReviewPeriodNotStart(v.Due)
+		}
+
 		return nil, fmt.Errorf("review: %w", err)
 	}
 

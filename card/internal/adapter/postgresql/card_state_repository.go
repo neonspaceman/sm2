@@ -101,6 +101,7 @@ func (r *CardStateRepository) Save(ctx context.Context, model *card_state_domain
 		Set(consts.CardStateDueColumn, model.Due).
 		Set(consts.CardStateCurrentIntervalInDaysColumn, model.CurrentIntervalInDays).
 		Set(consts.CardStateUpdatedAtColumn, model.UpdatedAt).
+		Where(sq.Eq{consts.CardStateIdColumn: model.Id}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {

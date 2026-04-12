@@ -1,12 +1,13 @@
 package grpc
 
 import (
-	"card/pkg/api/card"
+	card_api "card/pkg/api/card"
 	"context"
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"platform/pkg/request_id"
 	card_client "telegram-bot/internal/client/card"
 	"telegram-bot/internal/config"
@@ -14,7 +15,7 @@ import (
 )
 
 type CardClient struct {
-	grpc card.CardServiceClient
+	grpc card_api.CardServiceClient
 }
 
 func NewCardClient(cfg *config.Config) *CardClient {
@@ -28,19 +29,17 @@ func NewCardClient(cfg *config.Config) *CardClient {
 		panic(err)
 	}
 
-	grpcClient := card.NewCardServiceClient(conn)
+	grpcClient := card_api.NewCardServiceClient(conn)
 
 	return &CardClient{grpc: grpcClient}
 }
 
 func (c *CardClient) Create(ctx context.Context, userId uuid.UUID, question, answer string) (*card_client.Card, error) {
-	req := &card.CreateRequest{
+	response, err := c.grpc.Create(ctx, &card_api.CreateRequest{
 		UserId:   userId.String(),
 		Question: question,
 		Answer:   answer,
-	}
-
-	response, err := c.grpc.Create(ctx, req)
+	})
 
 	if err != nil {
 		return nil, err
@@ -50,13 +49,11 @@ func (c *CardClient) Create(ctx context.Context, userId uuid.UUID, question, ans
 }
 
 func (c *CardClient) GetCards(ctx context.Context, userId uuid.UUID, limit uint64, after string) ([]*card_client.Card, bool, string, error) {
-	req := &card.GetByUserIdRequest{
+	response, err := c.grpc.GetByUserId(ctx, &card_api.GetByUserIdRequest{
 		UserId: userId.String(),
 		Limit:  limit,
 		After:  after,
-	}
-
-	response, err := c.grpc.GetByUserId(ctx, req)
+	})
 
 	if err != nil {
 		return nil, false, "", err
@@ -71,6 +68,35 @@ func (c *CardClient) GetCards(ctx context.Context, userId uuid.UUID, limit uint6
 	return cards, response.HasNext, response.EndCursor, nil
 }
 
+func (c *CardClient) ReviewCard(ctx context.Context, userId uuid.UUID, cardId uuid.UUID, rating string) (*card_client.ReviewLog, error) {
+	parsedRating, err := card_client.FromRating(rating)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.grpc.Review(ctx, &card_api.ReviewCardRequest{
+		UserId:   userId.String(),
+		CardId:   cardId.String(),
+		ReviewAt: timestamppb.Now(),
+		Rating:   parsedRating,
+	})
+
+	if err != nil {
+		if _, ok := AsReason(err, "ERR_CARD_NOT_FOUND"); ok {
+			return nil, card_client.ErrCardNotFound
+		}
+
+		if _, ok := AsReason(err, "ERR_REVIEW_PERIOD_NOT_START"); ok {
+			return nil, card_client.ErrReviewPeriodNotStart
+		}
+
+		return nil, err
+	}
+
+	return card_client.ToReviewLog(response.ReviewLog), nil
+}
+
+// @todo: to platform??
 func InterceptorRequestId() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		requestId := request_id.CtxGet(ctx)

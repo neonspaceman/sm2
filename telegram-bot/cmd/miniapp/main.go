@@ -81,7 +81,8 @@ func run(cfg *config.Config) error {
 	getCardsHandler := query.NewGetCardByUserIdHandler(cardClient)
 
 	firstOrCreateUserHandler := command.NewFirstOrCreateUserHandler(userRepository)
-	createCard := command.NewCreateCardHandler(cardClient)
+	createCardHandler := command.NewCreateCardHandler(cardClient)
+	reviewCardHandler := command.NewReviewCardHandler(cardClient)
 
 	// TODO: remove this is for test now
 	botToken := "5768337691:AAH5YkoiEuPk8-FZa32hStHTqXiLPtAEhx8"
@@ -93,7 +94,13 @@ func run(cfg *config.Config) error {
 		gin.Recovery(),
 	)
 
-	cardHandler := rest.NewCardHandler(firstOrCreateUserHandler, getCardsHandler, createCard, validator)
+	cardHandler := rest.NewCardHandler(
+		firstOrCreateUserHandler,
+		getCardsHandler,
+		createCardHandler,
+		reviewCardHandler,
+		validator,
+	)
 	cardHandler.RegisterRoutes(r)
 
 	// Start miniapp on port 8080 (default)

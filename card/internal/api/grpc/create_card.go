@@ -37,7 +37,7 @@ func (s *CardImpl) Create(ctx context.Context, req *card_api.CreateRequest) (*ca
 	card, err := s.cardCreateHandler.Handle(ctx, cmd)
 
 	if err != nil {
-		return nil, fmt.Errorf("create card: %w", err)
+		return nil, fmt.Errorf("create card handler: %w", err)
 	}
 
 	return &card_api.CreateResponse{Card: mappers.FromCard(card)}, nil

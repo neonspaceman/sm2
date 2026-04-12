@@ -18,3 +18,12 @@ type CreateCardRequest struct {
 	Question string `json:"question" validate:"required"`
 	Answer   string `json:"answer" validate:"required"`
 }
+
+type ReviewCardRequest struct {
+	CardId string `json:"card_id" validate:"required,uuid"`
+	Rating string `json:"rating" validate:"required,oneof=AGAIN HARD GOOD EASY"`
+}
+
+type ReviewCardResponse struct {
+	ReviewLogId string `json:"review_log_id"`
+}

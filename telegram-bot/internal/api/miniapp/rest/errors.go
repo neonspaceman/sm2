@@ -50,3 +50,5 @@ func (e *HttpError) Error() string {
 }
 
 var ErrBadRequest = NewHttpError(http.StatusBadRequest, WithMessage("Bad request"))
+var ErrCardNotFound = NewHttpError(http.StatusNotFound, WithMessage("Card not found"))
+var ErrReviewPeriodNotStart = NewHttpError(http.StatusBadRequest, WithMessage("Review period does not start"))
